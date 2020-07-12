@@ -8,10 +8,23 @@
 
 import SwiftUI
 import RealityKit
+import Combine
 
 struct ContentView : View {
+    // This can't be right, but it is fetching, so that's good
+    var cancellable = NetworkClient().getWorlds
+        .sink(receiveCompletion: { error in
+            print("Error is \(error)")
+        }, receiveValue: { worlds in
+            print("got response \(worlds)")
+        })
+    
     var body: some View {
-        return ARViewContainer().edgesIgnoringSafeArea(.all)
+        return ARViewContainer()
+            .edgesIgnoringSafeArea(.all)
+            .onAppear {
+
+        }
     }
 }
 
@@ -28,7 +41,6 @@ struct ARViewContainer: UIViewRepresentable {
         arView.scene.anchors.append(boxAnchor)
         
         return arView
-        
     }
     
     func updateUIView(_ uiView: ARView, context: Context) {}

@@ -14,6 +14,7 @@
 		5F92348B24B981C60019EBE8 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F92348A24B981C60019EBE8 /* Preview Assets.xcassets */; };
 		5F92348E24B981C60019EBE8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5F92348C24B981C60019EBE8 /* LaunchScreen.storyboard */; };
 		5F92349924B981C70019EBE8 /* GardenARClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F92349824B981C70019EBE8 /* GardenARClientTests.swift */; };
+		5F9234A424B981EE0019EBE8 /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9234A324B981EE0019EBE8 /* NetworkClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +39,7 @@
 		5F92349424B981C70019EBE8 /* GardenARClientTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GardenARClientTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F92349824B981C70019EBE8 /* GardenARClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenARClientTests.swift; sourceTree = "<group>"; };
 		5F92349A24B981C70019EBE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5F9234A324B981EE0019EBE8 /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +88,7 @@
 				5F92348C24B981C60019EBE8 /* LaunchScreen.storyboard */,
 				5F92348F24B981C60019EBE8 /* Info.plist */,
 				5F92348924B981C60019EBE8 /* Preview Content */,
+				5F9234A324B981EE0019EBE8 /* NetworkClient.swift */,
 			);
 			path = GardenARClient;
 			sourceTree = "<group>";
@@ -211,6 +214,7 @@
 				5F92348424B981C30019EBE8 /* ContentView.swift in Sources */,
 				5F92348224B981C30019EBE8 /* AppDelegate.swift in Sources */,
 				5F92348624B981C30019EBE8 /* Experience.rcproject in Sources */,
+				5F9234A424B981EE0019EBE8 /* NetworkClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
