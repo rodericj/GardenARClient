@@ -9,13 +9,14 @@
 import SwiftUI
 
 struct NoSelectedWorldView: View {
-    @ObservedObject var viewModel: ViewModel
+    @EnvironmentObject var viewModel: ViewModel
+
     var body: some View {
         VStack {
             if viewModel.worlds.isEmpty {
-                AddWorldButton(viewModel: viewModel)
+                AddWorldButton()
             } else {
-                WorldListView(viewModel: viewModel)
+                WorldListView()
             }
         }
     }
@@ -23,7 +24,10 @@ struct NoSelectedWorldView: View {
 
 struct NoSelectedWorldView_Previews: PreviewProvider {
     static var previews: some View {
-        let client = NetworkClient()
-        return NoSelectedWorldView(viewModel: ViewModel(networkClient: client))
+        let bananaWorld = WorldInfo(title: "Banana", id: UUID())
+        let appleWorld = WorldInfo(title: "Apple", id: UUID())
+        let viewModelWithTwoWorlds = ViewModel(networkClient: NetworkClient())
+        viewModelWithTwoWorlds.worlds = [appleWorld, bananaWorld]
+        return NoSelectedWorldView().environmentObject(viewModelWithTwoWorlds)
     }
 }

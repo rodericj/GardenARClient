@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct WorldListView: View {
-    @ObservedObject var viewModel: ViewModel
+    @EnvironmentObject var viewModel: ViewModel
 
     var body: some View {
         List {
@@ -27,6 +27,6 @@ struct WorldListView: View {
 struct WorldListView_Previews: PreviewProvider {
     static var previews: some View {
         let viewModel = ViewModel(networkClient: NetworkClient())
-        return WorldListView(viewModel: viewModel)
+        return WorldListView().environmentObject(viewModel)
     }
 }

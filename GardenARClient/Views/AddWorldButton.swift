@@ -67,7 +67,7 @@ extension View {
 }
 
 struct AddWorldButton: View {
-    @ObservedObject var viewModel: ViewModel
+    @EnvironmentObject var viewModel: ViewModel
 
     var body: some View {
         VStack {
@@ -90,6 +90,6 @@ struct AddWorldButton: View {
 struct AddWorldButton_Previews: PreviewProvider {
     static var previews: some View {
         let viewModel = ViewModel(networkClient: NetworkClient())
-        return AddWorldButton(viewModel: viewModel)
+        return AddWorldButton().environmentObject(viewModel)
     }
 }

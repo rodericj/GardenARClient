@@ -12,15 +12,16 @@ import Combine
 
 struct ContentView : View {
 
-    @ObservedObject var viewModel: ViewModel
+    @EnvironmentObject var viewModel: ViewModel
+    
     var body: some View {
         return ZStack {
             ARViewContainer()
                 .edgesIgnoringSafeArea(.all)
             if viewModel.selectedWorld == nil {
-                NoSelectedWorldView(viewModel: viewModel)
+                NoSelectedWorldView()
             } else {
-               WithSelectedWorldView(viewModel: viewModel)
+               WithSelectedWorldView()
             }
 
         }
@@ -57,8 +58,8 @@ struct ContentView_Previews : PreviewProvider {
         let viewModelWithOutSelected = ViewModel(networkClient: NetworkClient())
 
         return Group {
-            ContentView(viewModel: viewModelWithOutSelected)
-            ContentView(viewModel: viewModelWithSelected)
+            ContentView().environmentObject(viewModelWithOutSelected)
+            ContentView().environmentObject(viewModelWithSelected)
         }
     }
 }

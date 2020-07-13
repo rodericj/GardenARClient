@@ -9,11 +9,11 @@
 import SwiftUI
 
 struct WithSelectedWorldView: View {
-    @ObservedObject var viewModel: ViewModel
+    @EnvironmentObject var viewModel: ViewModel
 
     var body: some View {
         ZStack {
-            AddWorldButton(viewModel: viewModel)
+            AddWorldButton()
             VStack {
                 if viewModel.worlds.count > 1 {
                     Button(action: {
@@ -44,8 +44,8 @@ struct WithSelectedWorldView_Previews: PreviewProvider {
         viewModelWithOneWorld.worlds = [bananaWorld]
 
         return Group {
-            WithSelectedWorldView(viewModel: viewModelWithTwoWorlds)
-            WithSelectedWorldView(viewModel: viewModelWithOneWorld)
+            WithSelectedWorldView().environmentObject(viewModelWithTwoWorlds)
+            WithSelectedWorldView().environmentObject(viewModelWithOneWorld)
         }
     }
 }
