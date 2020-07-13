@@ -27,19 +27,24 @@ protocol HasTitle {
     var title: String { get }
 }
 
-struct WorldInfo: Codable, Identifiable, HasTitle {
+struct WorldInfo: Codable, Identifiable, HasTitle, Equatable {
     let title: String
     let id: UUID
 }
 
 extension URL {
     static let world = URL(string: "http://thumbworksbot.ngrok.io/world")!
+    static func world(uuid: UUID) -> URL {
+        URL(string: "http://thumbworksbot.ngrok.io/world/\(uuid)")!
+    }
 }
 
 protocol NetworkFetching {
     var getWorlds: AnyPublisher<[WorldInfo], Error> { get }
     func makeWorld(named name: String) throws -> AnyPublisher<WorldInfo, Error>
+    func deleteWorld(uuid: UUID) throws -> AnyPublisher<Bool, Error>
 }
+
 class NetworkClient: NetworkFetching {
 
     let session: URLSession
@@ -65,6 +70,17 @@ class NetworkClient: NetworkFetching {
                        return world
                }.receive(on: DispatchQueue.main)
                    .eraseToAnyPublisher()
+    }
+
+    func deleteWorld(uuid: UUID) throws -> AnyPublisher<Bool, Error>  {
+        var request = URLRequest(url: URL.world(uuid: uuid))
+        request.httpMethod = "DELETE"
+        return session.dataTaskPublisher(for: request)
+
+            .tryMap { (data, response)  in
+                return true
+        }.receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
     var getWorlds: AnyPublisher<[WorldInfo], Error> {

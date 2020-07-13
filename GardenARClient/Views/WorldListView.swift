@@ -12,9 +12,15 @@ struct WorldListView: View {
     @ObservedObject var viewModel: ViewModel
 
     var body: some View {
-        List(viewModel.worlds) { world in
-            WorldRow(worldInfo: world, selected: self.$viewModel.selectedWorld)
+        List {
+            ForEach(viewModel.worlds) { world in
+                WorldRow(worldInfo: world, selected: self.$viewModel.selectedWorld)
+            }.onDelete(perform: delete)
         }.onAppear(perform: viewModel.getWorlds)
+    }
+
+    func delete(at offsets: IndexSet) {
+        viewModel.deleteWorld(at: offsets)
     }
 }
 

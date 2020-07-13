@@ -16,6 +16,8 @@
 		5F92348E24B981C60019EBE8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5F92348C24B981C60019EBE8 /* LaunchScreen.storyboard */; };
 		5F92349924B981C70019EBE8 /* GardenARClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F92349824B981C70019EBE8 /* GardenARClientTests.swift */; };
 		5F9234A424B981EE0019EBE8 /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9234A324B981EE0019EBE8 /* NetworkClient.swift */; };
+		5FA12A7C24BCCB6B00C6E059 /* NoSelectedWorldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA12A7B24BCCB6B00C6E059 /* NoSelectedWorldView.swift */; };
+		5FA12A7E24BCD2C800C6E059 /* WithSelectedWorldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA12A7D24BCD2C800C6E059 /* WithSelectedWorldView.swift */; };
 		5FC8F4AF24BAB6A300C3F87C /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */; };
 		5FC8F4B224BABCFD00C3F87C /* WorldListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B124BABCFD00C3F87C /* WorldListView.swift */; };
 		5FC8F4B424BABD8300C3F87C /* WorldRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B324BABD8200C3F87C /* WorldRow.swift */; };
@@ -45,6 +47,8 @@
 		5F92349824B981C70019EBE8 /* GardenARClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenARClientTests.swift; sourceTree = "<group>"; };
 		5F92349A24B981C70019EBE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5F9234A324B981EE0019EBE8 /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
+		5FA12A7B24BCCB6B00C6E059 /* NoSelectedWorldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoSelectedWorldView.swift; sourceTree = "<group>"; };
+		5FA12A7D24BCD2C800C6E059 /* WithSelectedWorldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithSelectedWorldView.swift; sourceTree = "<group>"; };
 		5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		5FC8F4B124BABCFD00C3F87C /* WorldListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldListView.swift; sourceTree = "<group>"; };
 		5FC8F4B324BABD8200C3F87C /* WorldRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldRow.swift; sourceTree = "<group>"; };
@@ -134,6 +138,8 @@
 				5FC8F4B124BABCFD00C3F87C /* WorldListView.swift */,
 				5FC8F4B324BABD8200C3F87C /* WorldRow.swift */,
 				5F18CEB524BAD78D00E10753 /* AddWorldButton.swift */,
+				5FA12A7B24BCCB6B00C6E059 /* NoSelectedWorldView.swift */,
+				5FA12A7D24BCD2C800C6E059 /* WithSelectedWorldView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -239,6 +245,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5FA12A7E24BCD2C800C6E059 /* WithSelectedWorldView.swift in Sources */,
 				5FC8F4AF24BAB6A300C3F87C /* ViewModel.swift in Sources */,
 				5FC8F4B424BABD8300C3F87C /* WorldRow.swift in Sources */,
 				5FC8F4B224BABCFD00C3F87C /* WorldListView.swift in Sources */,
@@ -247,6 +254,7 @@
 				5F92348224B981C30019EBE8 /* AppDelegate.swift in Sources */,
 				5F92348624B981C30019EBE8 /* Experience.rcproject in Sources */,
 				5F9234A424B981EE0019EBE8 /* NetworkClient.swift in Sources */,
+				5FA12A7C24BCCB6B00C6E059 /* NoSelectedWorldView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -18,19 +18,11 @@ struct ContentView : View {
             ARViewContainer()
                 .edgesIgnoringSafeArea(.all)
             if viewModel.selectedWorld == nil {
-                if viewModel.worlds.isEmpty {
-                    AddWorldButton(viewModel: viewModel)
-                } else {
-                    WorldListView(viewModel: viewModel)
-                }
+                NoSelectedWorldView(viewModel: viewModel)
             } else {
-                if viewModel.selectedWorld != nil {
-                    Text(viewModel.selectedWorld!.title)
-                    Text(viewModel.selectedWorld!.title)
-                    Spacer()
-                }
-                AddWorldButton(viewModel: viewModel)
+               WithSelectedWorldView(viewModel: viewModel)
             }
+
         }
         .onAppear(perform: viewModel.getWorlds)
     }
@@ -59,10 +51,14 @@ struct ARViewContainer: UIViewRepresentable {
 struct ContentView_Previews : PreviewProvider {
 
     static var previews: some View {
-        let client = NetworkClient()
+        let viewModelWithSelected = ViewModel(networkClient: NetworkClient())
+        viewModelWithSelected.selectedWorld = WorldInfo(title: "Banana", id: UUID())
+
+        let viewModelWithOutSelected = ViewModel(networkClient: NetworkClient())
+
         return Group {
-            ContentView(viewModel: ViewModel(networkClient: client))
-            ContentView(viewModel: ViewModel(networkClient: client))
+            ContentView(viewModel: viewModelWithOutSelected)
+            ContentView(viewModel: viewModelWithSelected)
         }
     }
 }

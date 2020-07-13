@@ -24,6 +24,18 @@ class ViewModel: ObservableObject, Identifiable, HasWorlds {
       self.networkClient = networkClient
     }
 
+    func deleteWorld(at offsets: IndexSet) {
+        try? offsets.map { worlds[$0].id }.forEach { uuid in
+            let disposable = try networkClient.deleteWorld(uuid: uuid ).sink(receiveCompletion: { error in
+                print("error deleting \(error)")
+            }, receiveValue: { succeeded in
+                self.getWorlds()
+            })
+                //.receive(on: DispatchQueue.main)
+            disposables.insert(disposable)
+        }
+    }
+
     func makeWorld(named name: String) throws {
         let cancellable = try networkClient.makeWorld(named: name).sink(receiveCompletion: { error in
             print("error in fetching \(error)")
