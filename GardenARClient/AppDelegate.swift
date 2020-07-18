@@ -18,8 +18,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Create the SwiftUI view that provides the window contents.
         let viewModel = ViewModel(networkClient: NetworkClient())
-        let contentView = ContentView().environmentObject(viewModel)
-
+        let arDelegate = ARDelegate(viewModel: viewModel)
+        arDelegate.setupListeners()
+        let contentView = ContentView(sceneDelegate: arDelegate).environmentObject(viewModel)
         // Use a UIHostingController as window root view controller.
         let window = UIWindow(frame: UIScreen.main.bounds)
         window.rootViewController = UIHostingController(rootView: contentView)

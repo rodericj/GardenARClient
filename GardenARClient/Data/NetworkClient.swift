@@ -28,8 +28,16 @@ protocol HasTitle {
 }
 
 struct WorldInfo: Codable, Identifiable, HasTitle, Equatable {
+
     let title: String
     let id: UUID
+    let data: Data?
+    var anchors = [Anchor]()
+    init(title: String, id: UUID) {
+        self.id = id
+        self.title = title
+        self.data = nil
+    }
 }
 
 extension URL {
@@ -42,6 +50,7 @@ extension URL {
 protocol NetworkFetching {
     var getWorlds: AnyPublisher<[WorldInfo], Error> { get }
     func makeWorld(named name: String) throws -> AnyPublisher<WorldInfo, Error>
+    func update(world: WorldInfo, anchorID: UUID, anchorName: String, worldMapData: Data) throws -> AnyPublisher<Anchor, Error>
     func deleteWorld(uuid: UUID) throws -> AnyPublisher<Bool, Error>
 }
 
@@ -52,6 +61,29 @@ class NetworkClient: NetworkFetching {
     init() {
         let config = URLSessionConfiguration.default
         session = URLSession(configuration: config)
+    }
+
+    struct AnchorDataPayload: Codable {
+        var anchorName: String
+        var data: Data
+    }
+
+    func update(world: WorldInfo, anchorID: UUID, anchorName: String, worldMapData: Data) throws -> AnyPublisher<Anchor, Error> {
+        var request = URLRequest(url: URL.world(uuid: world.id))
+        request.httpMethod = "POST"
+
+        let payloadData = AnchorDataPayload(anchorName: anchorName, data: worldMapData)
+        let payload = try JSONEncoder().encode(payloadData)
+        request.httpBody = payload
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        return session.dataTaskPublisher(for: request)
+            .tryMap { (data, response)  in
+                let anchor = try JSONDecoder().decode(Anchor.self, from: data)
+                return anchor
+        }.receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
     func makeWorld(named name: String) throws -> AnyPublisher<WorldInfo, Error> {
@@ -76,7 +108,6 @@ class NetworkClient: NetworkFetching {
         var request = URLRequest(url: URL.world(uuid: uuid))
         request.httpMethod = "DELETE"
         return session.dataTaskPublisher(for: request)
-
             .tryMap { (data, response)  in
                 return true
         }.receive(on: DispatchQueue.main)

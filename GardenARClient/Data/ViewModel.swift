@@ -13,6 +13,15 @@ protocol HasWorlds {
     var worlds: [WorldInfo] { get }
     var selectedWorld: WorldInfo? { get }
 }
+
+enum ViewModelError: Error {
+    case noWorldSelected
+}
+enum DataOrLoading {
+    case loading
+    case worlds([WorldInfo])
+}
+
 class ViewModel: ObservableObject, Identifiable, HasWorlds {
     private let networkClient: NetworkFetching
     private var disposables = Set<AnyCancellable>()
@@ -37,13 +46,33 @@ class ViewModel: ObservableObject, Identifiable, HasWorlds {
     }
 
     func makeWorld(named name: String) throws {
-        let cancellable = try networkClient.makeWorld(named: name).sink(receiveCompletion: { error in
-            print("error in fetching \(error)")
-        }, receiveValue: { newWorldInfo in
-            print("the new world was created")
-            self.getWorlds()
-        })
+        let cancellable = try networkClient.makeWorld(named: name)
+            .sink(receiveCompletion: { error in
+                print("error in fetching \(error)")
+            }, receiveValue: { newWorldInfo in
+                print("the new world was created")
+                self.selectedWorld = newWorldInfo
+                self.getWorlds()
+            })
         disposables.insert(cancellable)
+    }
+
+    func addAnchor(anchorName: String, worldData: Data) throws {
+        guard let currentSelectedWorld = selectedWorld else {
+            throw ViewModelError.noWorldSelected
+        }
+        let maybeWeDontNeedThisUUID = UUID()
+        let cancellable = try networkClient.update(world: currentSelectedWorld,
+                                                   anchorID: maybeWeDontNeedThisUUID,
+                                                   anchorName: anchorName,
+                                                   worldMapData: worldData).sink(receiveCompletion: { error in
+
+                                                   }, receiveValue: { anchor in
+                                                    print("just saved this anchor \(anchor) with id: \(anchor.id)")
+                                                    self.getWorlds()
+                                                   })
+        disposables.insert(cancellable)
+
     }
 
     func getWorlds() {

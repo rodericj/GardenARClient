@@ -6,17 +6,22 @@
 //  Copyright © 2020 Thumbworks. All rights reserved.
 //
 
+import ARKit
 import SwiftUI
 import RealityKit
 import Combine
 
+protocol HasOptionalARView {
+    var arView: ARView? { get set }
+}
+
 struct ContentView : View {
 
     @EnvironmentObject var viewModel: ViewModel
-    
+    let sceneDelegate: ARSessionDelegate & HasOptionalARView
     var body: some View {
         return ZStack {
-            ARViewContainer()
+            ARViewContainer(sceneDelegate: sceneDelegate)
                 .edgesIgnoringSafeArea(.all)
             if viewModel.selectedWorld == nil {
                 NoSelectedWorldView()
@@ -29,23 +34,30 @@ struct ContentView : View {
     }
 }
 
-struct ARViewContainer: UIViewRepresentable {
-    
+final class ARViewContainer: UIViewRepresentable {
+    var sceneDelegate: ARSessionDelegate & HasOptionalARView
+
+    init(sceneDelegate: ARSessionDelegate & HasOptionalARView) {
+        self.sceneDelegate = sceneDelegate
+    }
+
     func makeUIView(context: Context) -> ARView {
         
         let arView = ARView(frame: .zero)
-        
+        sceneDelegate.arView = arView
+        arView.session.delegate = sceneDelegate
         // Load the "Box" scene from the "Experience" Reality File
         let boxAnchor = try! Experience.loadBox()
         
         // Add the box anchor to the scene
         arView.scene.anchors.append(boxAnchor)
-        
+        arView.tapGestureSetup()
         return arView
     }
-    
+
+    // MARK: - Gesture recognizer callbacks
+
     func updateUIView(_ uiView: ARView, context: Context) {}
-    
 }
 
 #if DEBUG
@@ -58,8 +70,8 @@ struct ContentView_Previews : PreviewProvider {
         let viewModelWithOutSelected = ViewModel(networkClient: NetworkClient())
 
         return Group {
-            ContentView().environmentObject(viewModelWithOutSelected)
-            ContentView().environmentObject(viewModelWithSelected)
+            ContentView(sceneDelegate: ARDelegate(viewModel: viewModelWithOutSelected)).environmentObject(viewModelWithOutSelected)
+            ContentView(sceneDelegate: ARDelegate(viewModel: viewModelWithSelected)).environmentObject(viewModelWithSelected)
         }
     }
 }

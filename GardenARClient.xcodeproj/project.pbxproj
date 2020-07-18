@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		5F18CEB624BAD78D00E10753 /* AddWorldButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F18CEB524BAD78D00E10753 /* AddWorldButton.swift */; };
+		5F870B4C24C0FEC10007F644 /* ARViewTapExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F870B4B24C0FEC10007F644 /* ARViewTapExtension.swift */; };
+		5F870B4F24C0FF660007F644 /* ARKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F870B4E24C0FF660007F644 /* ARKit.framework */; };
+		5F870B5124C0FF6A0007F644 /* RealityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F870B5024C0FF6A0007F644 /* RealityKit.framework */; };
 		5F92348224B981C30019EBE8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F92348124B981C30019EBE8 /* AppDelegate.swift */; };
 		5F92348424B981C30019EBE8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F92348324B981C30019EBE8 /* ContentView.swift */; };
 		5F92348624B981C30019EBE8 /* Experience.rcproject in Sources */ = {isa = PBXBuildFile; fileRef = 5F92348524B981C30019EBE8 /* Experience.rcproject */; };
@@ -21,6 +24,9 @@
 		5FC8F4AF24BAB6A300C3F87C /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */; };
 		5FC8F4B224BABCFD00C3F87C /* WorldListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B124BABCFD00C3F87C /* WorldListView.swift */; };
 		5FC8F4B424BABD8300C3F87C /* WorldRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B324BABD8200C3F87C /* WorldRow.swift */; };
+		5FEACEF524C10F600016F885 /* ARKitSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FEACEF424C10F600016F885 /* ARKitSceneDelegate.swift */; };
+		5FEACEF824C113040016F885 /* PlantSigns.reality in Resources */ = {isa = PBXBuildFile; fileRef = 5FEACEF724C113040016F885 /* PlantSigns.reality */; };
+		5FEACEFA24C263910016F885 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FEACEF924C263910016F885 /* Anchor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,6 +41,9 @@
 
 /* Begin PBXFileReference section */
 		5F18CEB524BAD78D00E10753 /* AddWorldButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWorldButton.swift; sourceTree = "<group>"; };
+		5F870B4B24C0FEC10007F644 /* ARViewTapExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewTapExtension.swift; sourceTree = "<group>"; };
+		5F870B4E24C0FF660007F644 /* ARKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ARKit.framework; path = System/Library/Frameworks/ARKit.framework; sourceTree = SDKROOT; };
+		5F870B5024C0FF6A0007F644 /* RealityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RealityKit.framework; path = System/Library/Frameworks/RealityKit.framework; sourceTree = SDKROOT; };
 		5F92347E24B981C30019EBE8 /* GardenARClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GardenARClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F92348124B981C30019EBE8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5F92348324B981C30019EBE8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -52,6 +61,9 @@
 		5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		5FC8F4B124BABCFD00C3F87C /* WorldListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldListView.swift; sourceTree = "<group>"; };
 		5FC8F4B324BABD8200C3F87C /* WorldRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldRow.swift; sourceTree = "<group>"; };
+		5FEACEF424C10F600016F885 /* ARKitSceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARKitSceneDelegate.swift; sourceTree = "<group>"; };
+		5FEACEF724C113040016F885 /* PlantSigns.reality */ = {isa = PBXFileReference; lastKnownFileType = file; path = PlantSigns.reality; sourceTree = "<group>"; };
+		5FEACEF924C263910016F885 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +71,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5F870B5124C0FF6A0007F644 /* RealityKit.framework in Frameworks */,
+				5F870B4F24C0FF660007F644 /* ARKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,12 +86,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5F870B4A24C0FEAC0007F644 /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+				5F870B4B24C0FEC10007F644 /* ARViewTapExtension.swift */,
+				5FEACEF424C10F600016F885 /* ARKitSceneDelegate.swift */,
+			);
+			path = Utility;
+			sourceTree = "<group>";
+		};
+		5F870B4D24C0FF660007F644 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5F870B5024C0FF6A0007F644 /* RealityKit.framework */,
+				5F870B4E24C0FF660007F644 /* ARKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		5F92347524B981C30019EBE8 = {
 			isa = PBXGroup;
 			children = (
 				5F92348024B981C30019EBE8 /* GardenARClient */,
 				5F92349724B981C70019EBE8 /* GardenARClientTests */,
 				5F92347F24B981C30019EBE8 /* Products */,
+				5F870B4D24C0FF660007F644 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -93,6 +126,7 @@
 		5F92348024B981C30019EBE8 /* GardenARClient */ = {
 			isa = PBXGroup;
 			children = (
+				5FEACEF624C112E20016F885 /* Resources */,
 				5FC8F4B024BABCE100C3F87C /* Views */,
 				5FC8F4AD24BAB68B00C3F87C /* Data */,
 				5F92348124B981C30019EBE8 /* AppDelegate.swift */,
@@ -127,6 +161,7 @@
 			children = (
 				5F9234A324B981EE0019EBE8 /* NetworkClient.swift */,
 				5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */,
+				5FEACEF924C263910016F885 /* Anchor.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -134,6 +169,7 @@
 		5FC8F4B024BABCE100C3F87C /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5F870B4A24C0FEAC0007F644 /* Utility */,
 				5F92348324B981C30019EBE8 /* ContentView.swift */,
 				5FC8F4B124BABCFD00C3F87C /* WorldListView.swift */,
 				5FC8F4B324BABD8200C3F87C /* WorldRow.swift */,
@@ -142,6 +178,14 @@
 				5FA12A7D24BCD2C800C6E059 /* WithSelectedWorldView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		5FEACEF624C112E20016F885 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				5FEACEF724C113040016F885 /* PlantSigns.reality */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -160,6 +204,8 @@
 			dependencies = (
 			);
 			name = GardenARClient;
+			packageProductDependencies = (
+			);
 			productName = GardenARClient;
 			productReference = 5F92347E24B981C30019EBE8 /* GardenARClient.app */;
 			productType = "com.apple.product-type.application";
@@ -210,6 +256,8 @@
 				Base,
 			);
 			mainGroup = 5F92347524B981C30019EBE8;
+			packageReferences = (
+			);
 			productRefGroup = 5F92347F24B981C30019EBE8 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -226,6 +274,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5F92348E24B981C60019EBE8 /* LaunchScreen.storyboard in Resources */,
+				5FEACEF824C113040016F885 /* PlantSigns.reality in Resources */,
 				5F92348B24B981C60019EBE8 /* Preview Assets.xcassets in Resources */,
 				5F92348824B981C60019EBE8 /* Assets.xcassets in Resources */,
 			);
@@ -248,11 +297,14 @@
 				5FA12A7E24BCD2C800C6E059 /* WithSelectedWorldView.swift in Sources */,
 				5FC8F4AF24BAB6A300C3F87C /* ViewModel.swift in Sources */,
 				5FC8F4B424BABD8300C3F87C /* WorldRow.swift in Sources */,
+				5F870B4C24C0FEC10007F644 /* ARViewTapExtension.swift in Sources */,
 				5FC8F4B224BABCFD00C3F87C /* WorldListView.swift in Sources */,
 				5F92348424B981C30019EBE8 /* ContentView.swift in Sources */,
 				5F18CEB624BAD78D00E10753 /* AddWorldButton.swift in Sources */,
+				5FEACEF524C10F600016F885 /* ARKitSceneDelegate.swift in Sources */,
 				5F92348224B981C30019EBE8 /* AppDelegate.swift in Sources */,
 				5F92348624B981C30019EBE8 /* Experience.rcproject in Sources */,
+				5FEACEFA24C263910016F885 /* Anchor.swift in Sources */,
 				5F9234A424B981EE0019EBE8 /* NetworkClient.swift in Sources */,
 				5FA12A7C24BCCB6B00C6E059 /* NoSelectedWorldView.swift in Sources */,
 			);
@@ -338,7 +390,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -392,7 +444,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;

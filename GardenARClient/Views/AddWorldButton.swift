@@ -8,41 +8,39 @@
 
 import SwiftUI
 
-extension View {
-    func creationAlert(viewModel: ViewModel) {
-        let alert = UIAlertController(title: "Create new world", message: nil, preferredStyle: .alert)
+extension UIView {
+
+    // Since these are all static (and a hack) we can have it on whatever type we want, maybe shouldn't be on View
+    static func creationAlert(title: String, placeholder: String, completion: @escaping (String) -> ()) {
+        let alert = UIAlertController(title: title, message: nil, preferredStyle: .alert)
         alert.addTextField() { textField in
-            textField.placeholder = "New world name"
+            textField.placeholder = placeholder
         }
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in })
         alert.addAction(UIAlertAction(title: "Ok", style: .default) { _ in
             guard let textField = alert.textFields?.first,
-                let newWorldName = textField.text else {
+                let inputtedText = textField.text else {
                     return
             }
-            do {
-                try viewModel.makeWorld(named: newWorldName)
-            } catch {
-                print("There was an error in sending the network request to create the world")
-            }
+            completion(inputtedText)
         })
         showAlert(alert: alert)
     }
 
-    func showAlert(alert: UIAlertController) {
+    static func showAlert(alert: UIAlertController) {
         if let controller = topMostViewController() {
             controller.present(alert, animated: true)
         }
     }
 
-    private func topMostViewController() -> UIViewController? {
+    static private func topMostViewController() -> UIViewController? {
         guard let rootController = keyWindow()?.rootViewController else {
             return nil
         }
         return topMostViewController(for: rootController)
     }
 
-    private func topMostViewController(for controller: UIViewController) -> UIViewController {
+    static private func topMostViewController(for controller: UIViewController) -> UIViewController {
         if let presentedController = controller.presentedViewController {
             return topMostViewController(for: presentedController)
         } else if let navigationController = controller as? UINavigationController {
@@ -58,7 +56,7 @@ extension View {
         }
         return controller
     }
-    private func keyWindow() -> UIWindow? {
+    static private func keyWindow() -> UIWindow? {
         return UIApplication.shared.connectedScenes
             .filter {$0.activationState == .foregroundActive}
             .compactMap {$0 as? UIWindowScene}
@@ -73,7 +71,13 @@ struct AddWorldButton: View {
         VStack {
             Spacer()
             Button(action: {
-                self.creationAlert(viewModel: self.viewModel)
+                UIView.creationAlert(title: "Add a new World", placeholder: "The Backyard") { text in
+                    do {
+                        try self.viewModel.makeWorld(named: text)
+                    } catch {
+                        print("There was an error in sending the network request to create the world")
+                    }
+                }
             }) {
                 Text("New World")
                     .fontWeight(.heavy)

@@ -27,6 +27,8 @@ struct WorldListView: View {
 struct WorldListView_Previews: PreviewProvider {
     static var previews: some View {
         let viewModel = ViewModel(networkClient: NetworkClient())
+        viewModel.worlds = [WorldInfo(title: "banana", id: UUID()),
+                            WorldInfo(title: "some other world", id: UUID())]
         return WorldListView().environmentObject(viewModel)
     }
 }
