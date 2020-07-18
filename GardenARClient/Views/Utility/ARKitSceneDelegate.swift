@@ -36,12 +36,12 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
                     print("error loading plant signs async: \(error)")
                 }) { plantSignEntity in
                     print(plantSignEntity)
-                    guard let plantSignEntity = try? ModelEntity.load(named: "PlantSigns") else { return }
-                                      let anchorEntity = AnchorEntity(anchor: anchor)
-                                      anchorEntity.updatePlantSignName(name: "New Plant")
-                                      anchorEntity.addChild(plantSignEntity)
-                                      self.arView?.scene.addAnchor(anchorEntity)
-                                      anchorEntity.addOcclusionPlane()
+//                    guard let plantSignEntity = try? ModelEntity.load(named: "PlantSigns") else { return }
+                    let anchorEntity = AnchorEntity(anchor: anchor)
+                    anchorEntity.updatePlantSignName(name: "New Plant")
+                    anchorEntity.addChild(plantSignEntity)
+                    self.arView?.scene.addAnchor(anchorEntity)
+                    anchorEntity.addOcclusionPlane()
 
                     UIView.creationAlert(title: "Name this plant", placeholder: "Banana Squash") { plantName in
                         print("plant name \(plantName). Kick off the network request")

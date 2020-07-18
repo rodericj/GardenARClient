@@ -32,7 +32,7 @@ struct WorldInfo: Codable, Identifiable, HasTitle, Equatable {
     let title: String
     let id: UUID
     let data: Data?
-    var anchors = [Anchor]()
+    var anchors: [Anchor]?
     init(title: String, id: UUID) {
         self.id = id
         self.title = title
@@ -51,7 +51,7 @@ protocol NetworkFetching {
     var getWorlds: AnyPublisher<[WorldInfo], Error> { get }
     func makeWorld(named name: String) throws -> AnyPublisher<WorldInfo, Error>
     func update(world: WorldInfo, anchorID: UUID, anchorName: String, worldMapData: Data) throws -> AnyPublisher<Anchor, Error>
-    func deleteWorld(uuid: UUID) throws -> AnyPublisher<Bool, Error>
+    func deleteWorld(uuid: UUID) throws -> AnyPublisher<Bool, Never>
 }
 
 class NetworkClient: NetworkFetching {
@@ -96,31 +96,28 @@ class NetworkClient: NetworkFetching {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpMethod = "POST"
         return session.dataTaskPublisher(for: request)
-                   .tryMap { (data, response)  in
-                       // TODO handle network errors gracefully here
-                       let world = try JSONDecoder().decode(WorldInfo.self, from: data)
-                       return world
-               }.receive(on: DispatchQueue.main)
-                   .eraseToAnyPublisher()
+            .map { $0.data }
+            .decode(type: WorldInfo.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
-    func deleteWorld(uuid: UUID) throws -> AnyPublisher<Bool, Error>  {
+    func deleteWorld(uuid: UUID) throws -> AnyPublisher<Bool, Never>  {
         var request = URLRequest(url: URL.world(uuid: uuid))
         request.httpMethod = "DELETE"
         return session.dataTaskPublisher(for: request)
-            .tryMap { (data, response)  in
-                return true
-        }.receive(on: DispatchQueue.main)
+            .map { _ in true }
+            .replaceError(with: false)
+            .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
 
     var getWorlds: AnyPublisher<[WorldInfo], Error> {
         return session.dataTaskPublisher(for: URL.world)
-            .tryMap { (data, response)  in
-                // TODO handle network errors gracefully here
-                let worldsPayload = try JSONDecoder().decode(WorldInfoPayload.self, from: data)
-                return worldsPayload.worlds
-        }.receive(on: DispatchQueue.main)
+            .map { $0.data}
+            .decode(type: WorldInfoPayload.self, decoder: JSONDecoder())
+            .map { $0.worlds }
+            .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
 }

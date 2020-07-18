@@ -75,7 +75,7 @@ struct AddWorldButton: View {
                     do {
                         try self.viewModel.makeWorld(named: text)
                     } catch {
-                        print("There was an error in sending the network request to create the world")
+                        print("There was an error in sending the network request to create the world. \(error)")
                     }
                 }
             }) {

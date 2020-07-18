@@ -17,7 +17,11 @@ struct WorldRow: View {
             print("Select this world")
             self.selected = self.worldInfo
         }) {
-            Text(worldInfo.title)
+            VStack(alignment: .leading) {
+                Text(worldInfo.title).font(.largeTitle).autocapitalization(.words)
+                Spacer()
+                Text("\(worldInfo.anchors?.count ?? 0) Anchors").font(.body)
+            }
         }
     }
 }
@@ -28,6 +32,6 @@ struct WorldRow: View {
 //        let network = NetworkClient()
 //        let myWorldInfo = WorldInfo(title: "Backyard", id: UUID())
 //        let viewModel = ViewModel(networkClient: network)
-//        return WorldRow(worldInfo: myWorldInfo, selected: viewModel.selectedWorld)
+//        return WorldRow(worldInfo: myWorldInfo)
 //    }
 //}

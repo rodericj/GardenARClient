@@ -35,26 +35,32 @@ class ViewModel: ObservableObject, Identifiable, HasWorlds {
 
     func deleteWorld(at offsets: IndexSet) {
         try? offsets.map { worlds[$0].id }.forEach { uuid in
-            let disposable = try networkClient.deleteWorld(uuid: uuid ).sink(receiveCompletion: { error in
-                print("error deleting \(error)")
-            }, receiveValue: { succeeded in
-                self.getWorlds()
-            })
-                //.receive(on: DispatchQueue.main)
-            disposables.insert(disposable)
+            try networkClient
+                .deleteWorld(uuid: uuid )
+                .sink(receiveCompletion: { error in
+                    print("error deleting \(error)")
+                }, receiveValue: { succeeded in
+                    self.getWorlds()
+                }).store(in: &disposables)
         }
     }
 
     func makeWorld(named name: String) throws {
-        let cancellable = try networkClient.makeWorld(named: name)
+        try networkClient.makeWorld(named: name)
             .sink(receiveCompletion: { error in
+                switch error {
+
+                case .finished:
+                    print("finished \(error)")
+                case .failure(let errorWithLocalizedDescription):
+                    print(errorWithLocalizedDescription.localizedDescription)
+                }
                 print("error in fetching \(error)")
             }, receiveValue: { newWorldInfo in
                 print("the new world was created")
                 self.selectedWorld = newWorldInfo
                 self.getWorlds()
-            })
-        disposables.insert(cancellable)
+            }).store(in: &disposables)
     }
 
     func addAnchor(anchorName: String, worldData: Data) throws {
@@ -62,17 +68,15 @@ class ViewModel: ObservableObject, Identifiable, HasWorlds {
             throw ViewModelError.noWorldSelected
         }
         let maybeWeDontNeedThisUUID = UUID()
-        let cancellable = try networkClient.update(world: currentSelectedWorld,
-                                                   anchorID: maybeWeDontNeedThisUUID,
-                                                   anchorName: anchorName,
-                                                   worldMapData: worldData).sink(receiveCompletion: { error in
+        try networkClient.update(world: currentSelectedWorld,
+                                 anchorID: maybeWeDontNeedThisUUID,
+                                 anchorName: anchorName,
+                                 worldMapData: worldData).sink(receiveCompletion: { error in
 
-                                                   }, receiveValue: { anchor in
-                                                    print("just saved this anchor \(anchor) with id: \(anchor.id)")
-                                                    self.getWorlds()
-                                                   })
-        disposables.insert(cancellable)
-
+                                 }, receiveValue: { anchor in
+                                    print("just saved this anchor \(anchor) with id: \(anchor.id)")
+                                    self.getWorlds()
+                                 }).store(in: &disposables)
     }
 
     func getWorlds() {
