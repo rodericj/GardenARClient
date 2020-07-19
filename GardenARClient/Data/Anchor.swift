@@ -7,11 +7,18 @@
 //
 
 import Foundation
-final class Anchor: Codable, Equatable {
+final class Anchor: Codable, Equatable, CustomStringConvertible {
+    var description: String {
+        get {
+            return "\(id) : \(title)"
+        }
+    }
+
     static func == (lhs: Anchor, rhs: Anchor) -> Bool {
         return (lhs.id == rhs.id) && (lhs.title == rhs.title)
     }
 
     var id: UUID?
     var title: String
+
 }

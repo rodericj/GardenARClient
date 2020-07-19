@@ -27,7 +27,13 @@ class ViewModel: ObservableObject, Identifiable, HasWorlds {
     private var disposables = Set<AnyCancellable>()
 
     @Published var worlds: [WorldInfo] = []
-    @Published var selectedWorld: WorldInfo? = nil
+    @Published var selectedWorld: WorldInfo? = nil {
+        didSet {
+            anchors = selectedWorld?.anchors ?? []
+        }
+    }
+
+    @Published var anchors: [Anchor] = []
 
     init(networkClient: NetworkFetching) {
       self.networkClient = networkClient
@@ -57,25 +63,25 @@ class ViewModel: ObservableObject, Identifiable, HasWorlds {
                 }
                 print("error in fetching \(error)")
             }, receiveValue: { newWorldInfo in
-                print("the new world was created")
+                print("the new world was created") 
                 self.selectedWorld = newWorldInfo
                 self.getWorlds()
             }).store(in: &disposables)
     }
 
-    func addAnchor(anchorName: String, worldData: Data) throws {
+    func addAnchor(anchorName: String, anchorID: UUID, worldData: Data) throws {
         guard let currentSelectedWorld = selectedWorld else {
             throw ViewModelError.noWorldSelected
         }
-        let maybeWeDontNeedThisUUID = UUID()
+        print("ViewModel:AddAnchor We have a world selected, so send the anchor \(anchorID) \(anchorName) to the network client")
         try networkClient.update(world: currentSelectedWorld,
-                                 anchorID: maybeWeDontNeedThisUUID,
+                                 anchorID: anchorID,
                                  anchorName: anchorName,
                                  worldMapData: worldData).sink(receiveCompletion: { error in
 
                                  }, receiveValue: { anchor in
-                                    print("just saved this anchor \(anchor) with id: \(anchor.id)")
-                                    self.getWorlds()
+                                    print("ViewModel:AddAnchor just saved this anchor \(anchor) with id: \(anchor.id)")
+                                    self.selectedWorld?.anchors?.append(anchor)
                                  }).store(in: &disposables)
     }
 
@@ -98,6 +104,9 @@ class ViewModel: ObservableObject, Identifiable, HasWorlds {
                     // Auto select solo worlds
                     if worlds.count == 1 {
                         self.selectedWorld = worlds.first
+                    }
+                    if let selected = self.selectedWorld {
+                        self.anchors = selected.anchors ?? []
                     }
                     self.worlds = worlds
             })

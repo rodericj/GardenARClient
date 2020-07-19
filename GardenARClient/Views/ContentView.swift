@@ -61,6 +61,9 @@ final class ARViewContainer: UIViewRepresentable {
 }
 
 #if DEBUG
+class TestARSession: NSObject, ARSessionDelegate, HasOptionalARView {
+    var arView: ARView?
+}
 struct ContentView_Previews : PreviewProvider {
 
     static var previews: some View {
@@ -70,8 +73,8 @@ struct ContentView_Previews : PreviewProvider {
         let viewModelWithOutSelected = ViewModel(networkClient: NetworkClient())
 
         return Group {
-            ContentView(sceneDelegate: ARDelegate(viewModel: viewModelWithOutSelected)).environmentObject(viewModelWithOutSelected)
-            ContentView(sceneDelegate: ARDelegate(viewModel: viewModelWithSelected)).environmentObject(viewModelWithSelected)
+            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelWithOutSelected)
+            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelWithSelected)
         }
     }
 }

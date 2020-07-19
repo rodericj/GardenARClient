@@ -12,6 +12,10 @@ import RealityKit
 import SwiftUI
 import Combine
 
+enum AnchorError: Error {
+    case noUniqueIdentifier
+}
+
 class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
     let viewModel: ViewModel
 
@@ -20,7 +24,21 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
     }
 
     func setupListeners() {
+
+        viewModel.$anchors.sink { anchors in
+            print("new anchors")
+            anchors.forEach { anchor in
+                print("anchor: \(anchor.id!) \(anchor.title)")
+                if let foundHasAnchor = self.arView?.scene.anchors.first(where: { someAnchor -> Bool in
+                    someAnchor.anchorIdentifier == anchor.id
+                }), let entity = foundHasAnchor as? AnchorEntity {
+                    print("Found it in the scene. Now set the titlehome")
+                    entity.updatePlantSignName(name: anchor.title)
+                }
+            }
+        }.store(in: &disposables)
         viewModel.$selectedWorld.sink { worldInfo in
+            // TODO clean up the ar session, load this world if possible. There is sample code for this
             print("In the ARDelegate the view model has changed")
         }.store(in: &disposables)
     }
@@ -38,33 +56,54 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
                     print(plantSignEntity)
 //                    guard let plantSignEntity = try? ModelEntity.load(named: "PlantSigns") else { return }
                     let anchorEntity = AnchorEntity(anchor: anchor)
-                    anchorEntity.updatePlantSignName(name: "New Plant")
-                    anchorEntity.addChild(plantSignEntity)
-                    self.arView?.scene.addAnchor(anchorEntity)
-                    anchorEntity.addOcclusionPlane()
-
-                    UIView.creationAlert(title: "Name this plant", placeholder: "Banana Squash") { plantName in
-                        print("plant name \(plantName). Kick off the network request")
-                        session.getCurrentWorldMap { (map, error) in
-                            if let map = map,
-                                let worldData = try? NSKeyedArchiver.archivedData(withRootObject: map, requiringSecureCoding: true) {
-                                do {
-                                    try self.viewModel.addAnchor(anchorName: plantName, worldData: worldData)
-                                } catch {
-                                    print("Unable to add anchor to the server \(error)")
-                                }
-                            } else {
-                                print("no map data")
-                            }
-                            // If we have an error we need to remove the anchor
-                            if let error = error {
-                                print("error fetching current world map \(error)")
-                                self.arView?.scene.removeAnchor(anchorEntity)
-                            }
-                        }
-                        // TODO I need to move all of this code into an object that has access to the view model not an extension of the View
-                    }
+                    self.addEntity(anchorEntity: anchorEntity, plantSignEntity: plantSignEntity)
+                    self.showAlert(anchorEntity: anchorEntity, session: session)
             }.store(in: &disposables)
+        }
+    }
+}
+
+// private funcs
+extension ARDelegate {
+    private func showAlert(anchorEntity: AnchorEntity, session: ARSession) {
+        UIView.creationAlert(title: "Name this plant", placeholder: "Banana Squash") { plantName in
+            print("plant name \(plantName). Kick off the network request")
+                session.getCurrentWorldMap { (map, error) in
+                    do {
+                        try self.processFetchedWorldMap(map: map, error: error, plantName: plantName, anchorEntity: anchorEntity)
+                    } catch {
+                        print("failed to process fetched world map \(error)")
+                    }
+                }
+            // TODO I need to move all of this code into an object that has access to the view model not an extension of the View
+        }
+    }
+
+    private func addEntity(anchorEntity: AnchorEntity, plantSignEntity: Entity) {
+        anchorEntity.updatePlantSignName(name: "New Plant")
+        anchorEntity.addChild(plantSignEntity)
+        self.arView?.scene.addAnchor(anchorEntity)
+        anchorEntity.addOcclusionPlane()
+    }
+
+    private func processFetchedWorldMap(map: ARWorldMap?, error: Error?, plantName: String, anchorEntity: AnchorEntity) throws {
+        guard let anchorID = anchorEntity.anchorIdentifier else {
+            throw AnchorError.noUniqueIdentifier
+        }
+        if let map = map,
+            let worldData = try? NSKeyedArchiver.archivedData(withRootObject: map, requiringSecureCoding: true) {
+            do {
+                try self.viewModel.addAnchor(anchorName: plantName, anchorID: anchorID, worldData: worldData)
+            } catch {
+                print("Unable to add anchor to the server \(error)")
+            }
+        } else {
+            print("no map data")
+        }
+        // If we have an error we need to remove the anchor
+        if let error = error {
+            print("error fetching current world map \(error)")
+            self.arView?.scene.removeAnchor(anchorEntity)
         }
     }
 }

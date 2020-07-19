@@ -64,6 +64,7 @@ class NetworkClient: NetworkFetching {
     }
 
     struct AnchorDataPayload: Codable {
+        var id: UUID
         var anchorName: String
         var data: Data
     }
@@ -71,13 +72,13 @@ class NetworkClient: NetworkFetching {
     func update(world: WorldInfo, anchorID: UUID, anchorName: String, worldMapData: Data) throws -> AnyPublisher<Anchor, Error> {
         var request = URLRequest(url: URL.world(uuid: world.id))
         request.httpMethod = "POST"
-
-        let payloadData = AnchorDataPayload(anchorName: anchorName, data: worldMapData)
+        let payloadData = AnchorDataPayload(id: anchorID, anchorName: anchorName, data: worldMapData)
         let payload = try JSONEncoder().encode(payloadData)
         request.httpBody = payload
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
+        print("POST to server")
         return session.dataTaskPublisher(for: request)
             .tryMap { (data, response)  in
                 let anchor = try JSONDecoder().decode(Anchor.self, from: data)
