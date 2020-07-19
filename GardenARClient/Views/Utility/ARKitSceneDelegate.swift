@@ -40,6 +40,14 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
         viewModel.$selectedWorld.sink { worldInfo in
             // TODO clean up the ar session, load this world if possible. There is sample code for this
             print("In the ARDelegate the view model has changed")
+            guard let data = worldInfo?.data,
+                let worldMap = try? NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: data) else {
+                    print("Error loading the world map from the data. Something is pretty wrong here")
+                    return
+            }
+            let worldConfiguration = ARWorldTrackingConfiguration()
+            worldConfiguration.initialWorldMap = worldMap
+            self.arView?.session.run(worldConfiguration, options: [.resetTracking, .removeExistingAnchors])
         }.store(in: &disposables)
     }
     var arView: ARView?
@@ -47,17 +55,21 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
 
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
         print("ARDelegate object \(self)")
-        anchors.filter {$0.name == "NewUnnamedAnchor" }.forEach { anchor in
+        anchors.filter {$0.name == "NewUnnamedAnchor" }.forEach { sessionAnchor in
             print("This is the sphere anchor thing. Add some entity to the thing.")
             ModelEntity.loadAsync(named: "PlantSigns")
-                .sink(receiveCompletion: { error in
-                    print("error loading plant signs async: \(error)")
+                .sink(receiveCompletion: { result in
+                    switch result {
+                    case .finished:
+                        print("successfuly loaded plant sign async")
+                    case .failure(let error):
+                        print("error loading plant signs async: \(error)")
+                    }
                 }) { plantSignEntity in
                     print(plantSignEntity)
-//                    guard let plantSignEntity = try? ModelEntity.load(named: "PlantSigns") else { return }
-                    let anchorEntity = AnchorEntity(anchor: anchor)
+                    let anchorEntity = AnchorEntity(anchor: sessionAnchor)
                     self.addEntity(anchorEntity: anchorEntity, plantSignEntity: plantSignEntity)
-                    self.showAlert(anchorEntity: anchorEntity, session: session)
+                    self.showAlert(anchorEntity: anchorEntity, session: session, sessionAnchor: sessionAnchor)
             }.store(in: &disposables)
         }
     }
@@ -65,9 +77,11 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
 
 // private funcs
 extension ARDelegate {
-    private func showAlert(anchorEntity: AnchorEntity, session: ARSession) {
+    private func showAlert(anchorEntity: AnchorEntity, session: ARSession, sessionAnchor: ARAnchor) {
         UIView.creationAlert(title: "Name this plant", placeholder: "Banana Squash") { plantName in
             print("plant name \(plantName). Kick off the network request")
+            // TODO change the name of the anchor here:
+//            sessionAnchor.name = plantName
                 session.getCurrentWorldMap { (map, error) in
                     do {
                         try self.processFetchedWorldMap(map: map, error: error, plantName: plantName, anchorEntity: anchorEntity)

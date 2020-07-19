@@ -35,10 +35,10 @@ extension ARView {
 //                messageLabel.displayMessage("No surface detected, try getting closer.", duration: 2.0)
                 return
             }
-            let sphereAnchor = ARAnchor(name: "NewUnnamedAnchor", transform: raycastResult.worldTransform)
-                           self.session.add(anchor: sphereAnchor)
-           
-        }
+            let newTemporaryAnchor = ARAnchor(name: "NewUnnamedAnchor", transform: raycastResult.worldTransform)
+            self.session.add(anchor: newTemporaryAnchor)
+
+    }
 
         func tapGestureSetup() {
             let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tappedOnARView))
