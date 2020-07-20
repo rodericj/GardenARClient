@@ -9,23 +9,19 @@
 import Foundation
 import Combine
 
-protocol HasSpaces {
-    var spaces: [SpaceInfo] { get }
-    var selectedSpace: SpaceInfo? { get }
-}
-
 enum ViewModelError: Error {
     case noSpaceSelected
 }
+
 enum DataOrLoading {
     case loading
     case spaces([SpaceInfo])
 }
 
-class ViewModel: ObservableObject, Identifiable, HasSpaces {
+class ViewModel: ObservableObject, Identifiable {
     private let networkClient: NetworkFetching
     private var disposables = Set<AnyCancellable>()
-
+    
     @Published var spaces: [SpaceInfo] = []
     @Published var selectedSpace: SpaceInfo? = nil {
         didSet {
