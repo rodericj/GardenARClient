@@ -10,15 +10,17 @@ import SwiftUI
 
 struct SpacesListView: View {
     @EnvironmentObject var viewModel: ViewModel
-
+    
     var body: some View {
-        ZStack {
-            List {
-                ForEach(viewModel.spaces) { space in
-                    SpaceRow(spaceInfo: space, selected: self.$viewModel.selectedSpace)
-                }.onDelete(perform: delete)
-            }.onAppear(perform: viewModel.getSpaces)
-            AddSpaceButton()
+        NavigationView {
+            ZStack {
+                List {
+                    ForEach(viewModel.spaces) { space in
+                        SpaceRow(spaceInfo: space, selected: self.$viewModel.selectedSpace)
+                    }.onDelete(perform: delete)
+                }.onAppear(perform: viewModel.getSpaces)
+                AddSpaceButton()
+            }.navigationBarTitle(Text("Available Spaces"))
         }
     }
 
