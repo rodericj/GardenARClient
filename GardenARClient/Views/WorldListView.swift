@@ -12,11 +12,14 @@ struct WorldListView: View {
     @EnvironmentObject var viewModel: ViewModel
 
     var body: some View {
-        List {
-            ForEach(viewModel.worlds) { world in
-                WorldRow(worldInfo: world, selected: self.$viewModel.selectedWorld)
-            }.onDelete(perform: delete)
-        }.onAppear(perform: viewModel.getWorlds)
+        VStack {
+            List {
+                ForEach(viewModel.worlds) { world in
+                    WorldRow(worldInfo: world, selected: self.$viewModel.selectedWorld)
+                }.onDelete(perform: delete)
+            }.onAppear(perform: viewModel.getWorlds)
+            AddWorldButton()
+        }
     }
 
     func delete(at offsets: IndexSet) {

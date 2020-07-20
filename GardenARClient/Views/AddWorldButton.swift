@@ -79,7 +79,7 @@ struct AddWorldButton: View {
                     }
                 }
             }) {
-                Text("New World")
+                Text("+ New World")
                     .fontWeight(.heavy)
                     .font(.title)
                     .padding()
