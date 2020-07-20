@@ -11,10 +11,11 @@ import Combine
 struct WorldRow: View {
     let worldInfo: WorldInfo
     @Binding var selected: WorldInfo?
-
+    @EnvironmentObject var viewModel: ViewModel
     var body: some View {
         Button(action: {
-            print("Select this world")
+            print("🌎 Select world \(self.worldInfo.title)")
+            self.viewModel.get(world: self.worldInfo)
             self.selected = self.worldInfo
         }) {
             VStack(alignment: .leading) {

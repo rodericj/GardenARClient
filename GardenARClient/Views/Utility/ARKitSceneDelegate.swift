@@ -39,7 +39,7 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
             // TODO clean up the ar session, load this world if possible. There is sample code for this
             print("In the ARDelegate the view model has changed")
             guard let data = worldInfo?.data else {
-                print("This is likely a new world with no data saved on the server. Probably fine")
+                print("This is likely a new world with no data saved on the server. Probably fine. But we _may_ be fetching the world data now")
                 return
             }
             guard let worldMap = try? NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: data) else {
@@ -66,7 +66,7 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
 
         // Handle the new "NewUnnamedAnchor" which gets added from SwiftUI
         anchors.filter {$0.name == ARDelegate.unnamedAnchorName }.forEach { temporarySessionAnchor in
-            print("This is an anchor in the session: \(temporarySessionAnchor.name). \(temporarySessionAnchor.identifier) \(temporarySessionAnchor.sessionIdentifier)")
+            print("This is an anchor in the session: \(temporarySessionAnchor.name ?? "No name set for this temporary session anchor"). \(temporarySessionAnchor.identifier) \(temporarySessionAnchor.sessionIdentifier?.uuidString ?? "No session Identifier set for this temporary session anchor")")
             UIView.creationAlert(title: "Name this plant", placeholder: "Banana Squash") { plantName in
                 self.temporaryAnchorsToRemove.insert(temporarySessionAnchor)
                 session.remove(anchor: temporarySessionAnchor)
@@ -79,15 +79,23 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
 
         // Handle the new "named anchor" which gets added from an unnamed anchor above
         anchors.filter { $0.name != nil && $0.name != ARDelegate.unnamedAnchorName }.forEach { newNamedAnchor in
-            print("Anchor got added \(newNamedAnchor.name ?? "Unnamed") \(newNamedAnchor.identifier). Let's remove it from the pending set and send it if it's empty")
+            print("Anchor got added named: \(newNamedAnchor.name ?? "Unnamed") with anchor identifier: \(newNamedAnchor.identifier). Let's remove it from the pending set and send it if it's empty")
             pendingAddedAnchors.remove(newNamedAnchor)
 
             if pendingAddedAnchors.isEmpty {
                 print("Good, we should check temporary removals")
                 if temporaryAnchorsToRemove.isEmpty {
                     print("both temporary sets are now empty. Send the payload")
-                    session.getCurrentWorldMap { (map, error) in
-                        print("We got the map. here are the anchors \(map?.anchors.map { $0.name })")
+                    session.getCurrentWorldMap { (map, getWorldMapError) in
+                        if let error = getWorldMapError {
+                            print("🔴 Error fetching the world map. \(error)")
+                            return
+                        }
+                        guard let map = map else {
+                            print("🔴 Couldn't fetch the world map, but no error.")
+                            return
+                        }
+                        print("We got the map. here are the anchors \(map.anchors.map { $0.name })")
                         guard let pendingAnchorName = newNamedAnchor.name else {
                             fatalError("The anchor we sent has no name")
                         }
@@ -97,15 +105,15 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
                                 switch result {
                                 case .finished:
                                     print("successfuly loaded plant sign async")
-                                case .failure(let error):
-                                    print("error loading plant signs async: \(error)")
+                                case .failure(let fetchModelError):
+                                    print("🔴 Error loading plant signs async: \(fetchModelError)")
                                 }
                             }) { plantSignEntity in
                                 print(plantSignEntity)
                                 self.addEntity(anchorEntity: anchorEntity, plantSignEntity: plantSignEntity, name: pendingAnchorName)
                                 // we need to have this processFetchedWorldMap in this completion block, but it's a non throwing?
                                 do {
-                                    try self.processFetchedWorldMap(map: map, error: error, plantName: pendingAnchorName, anchorEntity: anchorEntity)
+                                    try self.processFetchedWorldMap(map: map, plantName: pendingAnchorName, anchorEntity: anchorEntity)
                                 } catch {
                                     print("Unable to process the FetchedWorldMap \(error)")
                                 }
@@ -145,13 +153,12 @@ extension ARDelegate {
      * - Parameter plantName: The name of the anchor we're sending to the view model
      * - Parameter anchorEntity: In the case of an error we will need to remove this anchor
      */
-    private func processFetchedWorldMap(map: ARWorldMap?, error: Error?, plantName: String, anchorEntity: AnchorEntity) throws {
+    private func processFetchedWorldMap(map: ARWorldMap, plantName: String, anchorEntity: AnchorEntity) throws {
         guard let anchorID = anchorEntity.anchorIdentifier else {
             self.arView?.scene.removeAnchor(anchorEntity)
             throw AnchorError.noUniqueIdentifier("We attempted to archive the world but the anchorEntity did not have an anchorIdentifier. It's optional but should be set when added to the session.")
         }
-        if let map = map,
-            let worldData = try? NSKeyedArchiver.archivedData(withRootObject: map, requiringSecureCoding: true) {
+        if let worldData = try? NSKeyedArchiver.archivedData(withRootObject: map, requiringSecureCoding: true) {
             do {
                 try self.viewModel.addAnchor(anchorName: plantName, anchorID: anchorID, worldData: worldData)
             } catch {
@@ -164,10 +171,6 @@ extension ARDelegate {
         }
         // If we have an error we need to remove the anchor
         // TODO we may want to handle the error case outside of this method. There are other scenarios where we may want to remove the anchor
-        if let error = error {
-            print("error fetching current world map \(error)")
-            self.arView?.scene.removeAnchor(anchorEntity)
-        }
     }
 }
 

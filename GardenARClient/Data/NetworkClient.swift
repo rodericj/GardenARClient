@@ -9,7 +9,7 @@
 import Foundation
 import Combine
 
-struct WorldInfoPayload: Decodable {
+struct WorldsInfoPayload: Decodable {
     let worlds: [WorldInfo]
     init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
@@ -21,6 +21,10 @@ struct WorldInfoPayload: Decodable {
         }
         worlds = newWorlds
     }
+}
+
+struct WorldInfoPayload: Decodable {
+    let world: WorldInfo
 }
 
 protocol HasTitle {
@@ -55,6 +59,7 @@ extension URL {
 
 protocol NetworkFetching {
     var getWorlds: AnyPublisher<[WorldInfo], Error> { get }
+    func getWorld(uuid: UUID) -> AnyPublisher<WorldInfo, Error>
     func makeWorld(named name: String) throws -> AnyPublisher<WorldInfo, Error>
     func update(world: WorldInfo, anchorID: UUID, anchorName: String, worldMapData: Data) throws -> AnyPublisher<Anchor, Error>
     func deleteWorld(uuid: UUID) throws -> AnyPublisher<Bool, Never>
@@ -122,9 +127,17 @@ class NetworkClient: NetworkFetching {
     var getWorlds: AnyPublisher<[WorldInfo], Error> {
         return session.dataTaskPublisher(for: URL.world)
             .map { $0.data}
-            .decode(type: WorldInfoPayload.self, decoder: JSONDecoder())
+            .decode(type: WorldsInfoPayload.self, decoder: JSONDecoder())
             .map { $0.worlds }
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
+
+    func getWorld(uuid: UUID) -> AnyPublisher<WorldInfo, Error> {
+           return session.dataTaskPublisher(for: URL.world(uuid: uuid))
+               .map { $0.data}
+               .decode(type: WorldInfo.self, decoder: JSONDecoder())
+               .receive(on: DispatchQueue.main)
+               .eraseToAnyPublisher()
+       }
 }
