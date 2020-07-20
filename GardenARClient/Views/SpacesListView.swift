@@ -12,7 +12,7 @@ struct SpacesListView: View {
     @EnvironmentObject var viewModel: ViewModel
 
     var body: some View {
-        VStack {
+        ZStack {
             List {
                 ForEach(viewModel.spaces) { space in
                     SpaceRow(spaceInfo: space, selected: self.$viewModel.selectedSpace)
