@@ -35,7 +35,7 @@ extension ARView {
 //                messageLabel.displayMessage("No surface detected, try getting closer.", duration: 2.0)
                 return
             }
-            let newTemporaryAnchor = ARAnchor(name: "NewUnnamedAnchor", transform: raycastResult.worldTransform)
+            let newTemporaryAnchor = ARAnchor(name: ARDelegate.unnamedAnchorName, transform: raycastResult.worldTransform)
             self.session.add(anchor: newTemporaryAnchor)
 
     }
