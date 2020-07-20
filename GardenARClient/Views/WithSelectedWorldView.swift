@@ -16,10 +16,15 @@ struct WithSelectedWorldView: View {
             AddWorldButton()
             VStack {
                 Button(action: {
-                    print("edit world")
                     self.viewModel.selectedWorld = nil
                 }) {
-                    Text(viewModel.selectedWorld?.title ?? "")
+                    Text("World: \(viewModel.selectedWorld?.title ?? "")")
+                        .fontWeight(.heavy)
+                        .font(.title)
+                        .padding()
+                        .foregroundColor(.black)
+                        .background(Color.white)
+                        .cornerRadius(40)
                 }
                 Spacer()
             }
