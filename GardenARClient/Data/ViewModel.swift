@@ -29,7 +29,11 @@ class ViewModel: ObservableObject, Identifiable, HasWorlds {
     @Published var worlds: [WorldInfo] = []
     @Published var selectedWorld: WorldInfo? = nil {
         didSet {
-            anchors = selectedWorld?.anchors ?? []
+            if oldValue != selectedWorld {
+                anchors = selectedWorld?.anchors ?? []
+            } else {
+                print("The selectedWorld was set but it's the same as it was before")
+            }
         }
     }
 
