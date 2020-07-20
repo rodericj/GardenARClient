@@ -13,7 +13,6 @@
 		5F870B5124C0FF6A0007F644 /* RealityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F870B5024C0FF6A0007F644 /* RealityKit.framework */; };
 		5F92348224B981C30019EBE8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F92348124B981C30019EBE8 /* AppDelegate.swift */; };
 		5F92348424B981C30019EBE8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F92348324B981C30019EBE8 /* ContentView.swift */; };
-		5F92348624B981C30019EBE8 /* Experience.rcproject in Sources */ = {isa = PBXBuildFile; fileRef = 5F92348524B981C30019EBE8 /* Experience.rcproject */; };
 		5F92348824B981C60019EBE8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F92348724B981C60019EBE8 /* Assets.xcassets */; };
 		5F92348B24B981C60019EBE8 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F92348A24B981C60019EBE8 /* Preview Assets.xcassets */; };
 		5F92348E24B981C60019EBE8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5F92348C24B981C60019EBE8 /* LaunchScreen.storyboard */; };
@@ -47,7 +46,6 @@
 		5F92347E24B981C30019EBE8 /* GardenARClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GardenARClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F92348124B981C30019EBE8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5F92348324B981C30019EBE8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		5F92348524B981C30019EBE8 /* Experience.rcproject */ = {isa = PBXFileReference; lastKnownFileType = file.rcproject; path = Experience.rcproject; sourceTree = "<group>"; };
 		5F92348724B981C60019EBE8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5F92348A24B981C60019EBE8 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		5F92348D24B981C60019EBE8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -130,7 +128,6 @@
 				5FC8F4B024BABCE100C3F87C /* Views */,
 				5FC8F4AD24BAB68B00C3F87C /* Data */,
 				5F92348124B981C30019EBE8 /* AppDelegate.swift */,
-				5F92348524B981C30019EBE8 /* Experience.rcproject */,
 				5F92348724B981C60019EBE8 /* Assets.xcassets */,
 				5F92348C24B981C60019EBE8 /* LaunchScreen.storyboard */,
 				5F92348F24B981C60019EBE8 /* Info.plist */,
@@ -303,7 +300,6 @@
 				5F18CEB624BAD78D00E10753 /* AddSpaceButton.swift in Sources */,
 				5FEACEF524C10F600016F885 /* ARKitSceneDelegate.swift in Sources */,
 				5F92348224B981C30019EBE8 /* AppDelegate.swift in Sources */,
-				5F92348624B981C30019EBE8 /* Experience.rcproject in Sources */,
 				5FEACEFA24C263910016F885 /* Anchor.swift in Sources */,
 				5F9234A424B981EE0019EBE8 /* NetworkClient.swift in Sources */,
 				5FA12A7C24BCCB6B00C6E059 /* NoSelectedSpaceView.swift in Sources */,

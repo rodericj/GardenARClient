@@ -46,11 +46,6 @@ final class ARViewContainer: UIViewRepresentable {
         let arView = ARView(frame: .zero)
         sceneDelegate.arView = arView
         arView.session.delegate = sceneDelegate
-        // Load the "Box" scene from the "Experience" Reality File
-        let boxAnchor = try! Experience.loadBox()
-        
-        // Add the box anchor to the scene
-        arView.scene.anchors.append(boxAnchor)
         arView.tapGestureSetup()
         return arView
     }
