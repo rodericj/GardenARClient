@@ -10,7 +10,7 @@ import Foundation
 final class Anchor: Codable, Equatable, CustomStringConvertible {
     var description: String {
         get {
-            return "\(id?.uuidString ?? "No UUID set for this anchor") : \(title)"
+            return title
         }
     }
 

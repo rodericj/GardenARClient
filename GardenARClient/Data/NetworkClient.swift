@@ -27,7 +27,13 @@ protocol HasTitle {
     var title: String { get }
 }
 
-struct WorldInfo: Codable, Identifiable, HasTitle, Equatable {
+struct WorldInfo: Codable, Identifiable, HasTitle, Equatable, CustomStringConvertible {
+    var description: String {
+        get {
+            return "\n\(title) \(data?.description ?? "no data") \(anchors ?? [])"
+        }
+    }
+
 
     let title: String
     let id: UUID
