@@ -57,15 +57,13 @@ class ViewModel: ObservableObject, Identifiable, HasWorlds {
 
     func makeWorld(named name: String) throws {
         try networkClient.makeWorld(named: name)
-            .sink(receiveCompletion: { error in
-                switch error {
-
+            .sink(receiveCompletion: { result in
+                switch result {
                 case .finished:
-                    print("finished \(error)")
+                    print("finished making world")
                 case .failure(let errorWithLocalizedDescription):
-                    print(errorWithLocalizedDescription.localizedDescription)
+                    print("error in fetching \(errorWithLocalizedDescription.localizedDescription)")
                 }
-                print("error in fetching \(error)")
             }, receiveValue: { newWorldInfo in
                 print("the new world was created") 
                 self.selectedWorld = newWorldInfo
