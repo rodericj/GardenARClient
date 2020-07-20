@@ -15,14 +15,10 @@ struct WithSelectedWorldView: View {
         ZStack {
             AddWorldButton()
             VStack {
-                if viewModel.worlds.count > 1 {
-                    Button(action: {
-                        print("edit world")
-                        self.viewModel.selectedWorld = nil
-                    }) {
-                        Text(viewModel.selectedWorld?.title ?? "")
-                    }
-                } else {
+                Button(action: {
+                    print("edit world")
+                    self.viewModel.selectedWorld = nil
+                }) {
                     Text(viewModel.selectedWorld?.title ?? "")
                 }
                 Spacer()

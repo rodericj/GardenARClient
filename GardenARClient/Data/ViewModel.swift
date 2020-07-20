@@ -130,11 +130,6 @@ class ViewModel: ObservableObject, Identifiable, HasWorlds {
                 },
                 receiveValue: { [weak self] worlds in
                     guard let self = self else { return }
-
-                    // Auto select solo worlds
-                    if worlds.count == 1 {
-                        self.selectedWorld = worlds.first
-                    }
                     if let selected = self.selectedWorld {
                         self.anchors = selected.anchors ?? []
                     }
