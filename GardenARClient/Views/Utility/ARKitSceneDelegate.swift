@@ -35,11 +35,10 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
                 print("anchor: \(anchor.id!) \(anchor.title)")
             }
         }.store(in: &disposables)
-        viewModel.$selectedWorld.sink { worldInfo in
-            // TODO clean up the ar session, load this world if possible. There is sample code for this
+        viewModel.$selectedSpace.sink { spaceInfo in
             print("In the ARDelegate the view model has changed")
-            guard let data = worldInfo?.data else {
-                print("This is likely a new world with no data saved on the server. Probably fine. But we _may_ be fetching the world data now")
+            guard let data = spaceInfo?.data else {
+                print("This is likely a new space with no data saved on the server. Probably fine. But we _may_ be fetching the space data now")
                 return
             }
             guard let worldMap = try? NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: data) else {
@@ -149,7 +148,6 @@ extension ARDelegate {
     /**
      *  Save the map to a data representation, send it to the view model
      * - Parameter map: The world map which should be sent to the server
-     * - Parameter error: An error that may have occured when fetching the world map
      * - Parameter plantName: The name of the anchor we're sending to the view model
      * - Parameter anchorEntity: In the case of an error we will need to remove this anchor
      */

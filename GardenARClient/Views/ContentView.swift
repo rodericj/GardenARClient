@@ -23,14 +23,14 @@ struct ContentView : View {
         return ZStack {
             ARViewContainer(sceneDelegate: sceneDelegate)
                 .edgesIgnoringSafeArea(.all)
-            if viewModel.selectedWorld == nil {
-                NoSelectedWorldView()
+            if viewModel.selectedSpace == nil {
+                NoSelectedSpaceView()
             } else {
-               WithSelectedWorldView()
+               WithSelectedSpaceView()
             }
 
         }
-        .onAppear(perform: viewModel.getWorlds)
+        .onAppear(perform: viewModel.getSpaces)
     }
 }
 
@@ -68,7 +68,7 @@ struct ContentView_Previews : PreviewProvider {
 
     static var previews: some View {
         let viewModelWithSelected = ViewModel(networkClient: NetworkClient())
-        viewModelWithSelected.selectedWorld = WorldInfo(title: "Banana", id: UUID())
+        viewModelWithSelected.selectedSpace = SpaceInfo(title: "Banana", id: UUID())
 
         let viewModelWithOutSelected = ViewModel(networkClient: NetworkClient())
 

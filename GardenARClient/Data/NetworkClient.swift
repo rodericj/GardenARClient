@@ -9,29 +9,29 @@
 import Foundation
 import Combine
 
-struct WorldsInfoPayload: Decodable {
-    let worlds: [WorldInfo]
+struct SpacesInfoPayload: Decodable {
+    let spaces: [SpaceInfo]
     init(from decoder: Decoder) throws {
         var container = try decoder.unkeyedContainer()
-        var world: WorldInfo
-        var newWorlds = [WorldInfo]()
+        var space: SpaceInfo
+        var newSpaces = [SpaceInfo]()
         while !container.isAtEnd {
-            world = try container.decode(WorldInfo.self)
-            newWorlds.append(world)
+            space = try container.decode(SpaceInfo.self)
+            newSpaces.append(space)
         }
-        worlds = newWorlds
+        spaces = newSpaces
     }
 }
 
-struct WorldInfoPayload: Decodable {
-    let world: WorldInfo
+struct SpaceInfoPayload: Decodable {
+    let space: SpaceInfo
 }
 
 protocol HasTitle {
     var title: String { get }
 }
 
-struct WorldInfo: Codable, Identifiable, HasTitle, Equatable, CustomStringConvertible {
+struct SpaceInfo: Codable, Identifiable, HasTitle, Equatable, CustomStringConvertible {
     var description: String {
         get {
             return "\n\(title) \(data?.description ?? "no data") \(anchors ?? [])"
@@ -51,18 +51,18 @@ struct WorldInfo: Codable, Identifiable, HasTitle, Equatable, CustomStringConver
 }
 
 extension URL {
-    static let world = URL(string: "http://thumbworksbot.ngrok.io/world")!
-    static func world(uuid: UUID) -> URL {
-        URL(string: "http://thumbworksbot.ngrok.io/world/\(uuid)")!
+    static let space = URL(string: "http://thumbworksbot.ngrok.io/space")!
+    static func space(uuid: UUID) -> URL {
+        URL(string: "http://thumbworksbot.ngrok.io/space/\(uuid)")!
     }
 }
 
 protocol NetworkFetching {
-    var getWorlds: AnyPublisher<[WorldInfo], Error> { get }
-    func getWorld(uuid: UUID) -> AnyPublisher<WorldInfo, Error>
-    func makeWorld(named name: String) throws -> AnyPublisher<WorldInfo, Error>
-    func update(world: WorldInfo, anchorID: UUID, anchorName: String, worldMapData: Data) throws -> AnyPublisher<Anchor, Error>
-    func deleteWorld(uuid: UUID) throws -> AnyPublisher<Bool, Never>
+    var getSpaces: AnyPublisher<[SpaceInfo], Error> { get }
+    func getSpace(uuid: UUID) -> AnyPublisher<SpaceInfo, Error>
+    func makeSpace(named name: String) throws -> AnyPublisher<SpaceInfo, Error>
+    func update(space: SpaceInfo, anchorID: UUID, anchorName: String, worldMapData: Data) throws -> AnyPublisher<Anchor, Error>
+    func deleteSpace(uuid: UUID) throws -> AnyPublisher<Bool, Never>
 }
 
 class NetworkClient: NetworkFetching {
@@ -80,8 +80,8 @@ class NetworkClient: NetworkFetching {
         var data: Data
     }
 
-    func update(world: WorldInfo, anchorID: UUID, anchorName: String, worldMapData: Data) throws -> AnyPublisher<Anchor, Error> {
-        var request = URLRequest(url: URL.world(uuid: world.id))
+    func update(space: SpaceInfo, anchorID: UUID, anchorName: String, worldMapData: Data) throws -> AnyPublisher<Anchor, Error> {
+        var request = URLRequest(url: URL.space(uuid: space.id))
         request.httpMethod = "POST"
         let payloadData = AnchorDataPayload(id: anchorID, anchorName: anchorName, data: worldMapData)
         let payload = try JSONEncoder().encode(payloadData)
@@ -98,10 +98,10 @@ class NetworkClient: NetworkFetching {
             .eraseToAnyPublisher()
     }
 
-    func makeWorld(named name: String) throws -> AnyPublisher<WorldInfo, Error> {
-        var request = URLRequest(url: URL.world)
+    func makeSpace(named name: String) throws -> AnyPublisher<SpaceInfo, Error> {
+        var request = URLRequest(url: URL.space)
 
-        let payload = try JSONEncoder().encode(WorldInfo(title: name, id: UUID()))
+        let payload = try JSONEncoder().encode(SpaceInfo(title: name, id: UUID()))
         
         request.httpBody = payload
         request.setValue("application/json", forHTTPHeaderField: "Accept")
@@ -109,13 +109,13 @@ class NetworkClient: NetworkFetching {
         request.httpMethod = "POST"
         return session.dataTaskPublisher(for: request)
             .map { $0.data }
-            .decode(type: WorldInfo.self, decoder: JSONDecoder())
+            .decode(type: SpaceInfo.self, decoder: JSONDecoder())
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
 
-    func deleteWorld(uuid: UUID) throws -> AnyPublisher<Bool, Never>  {
-        var request = URLRequest(url: URL.world(uuid: uuid))
+    func deleteSpace(uuid: UUID) throws -> AnyPublisher<Bool, Never>  {
+        var request = URLRequest(url: URL.space(uuid: uuid))
         request.httpMethod = "DELETE"
         return session.dataTaskPublisher(for: request)
             .map { _ in true }
@@ -124,19 +124,19 @@ class NetworkClient: NetworkFetching {
             .eraseToAnyPublisher()
     }
 
-    var getWorlds: AnyPublisher<[WorldInfo], Error> {
-        return session.dataTaskPublisher(for: URL.world)
+    var getSpaces: AnyPublisher<[SpaceInfo], Error> {
+        return session.dataTaskPublisher(for: URL.space)
             .map { $0.data}
-            .decode(type: WorldsInfoPayload.self, decoder: JSONDecoder())
-            .map { $0.worlds }
+            .decode(type: SpacesInfoPayload.self, decoder: JSONDecoder())
+            .map { $0.spaces }
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
 
-    func getWorld(uuid: UUID) -> AnyPublisher<WorldInfo, Error> {
-           return session.dataTaskPublisher(for: URL.world(uuid: uuid))
+    func getSpace(uuid: UUID) -> AnyPublisher<SpaceInfo, Error> {
+           return session.dataTaskPublisher(for: URL.space(uuid: uuid))
                .map { $0.data}
-               .decode(type: WorldInfo.self, decoder: JSONDecoder())
+               .decode(type: SpaceInfo.self, decoder: JSONDecoder())
                .receive(on: DispatchQueue.main)
                .eraseToAnyPublisher()
        }

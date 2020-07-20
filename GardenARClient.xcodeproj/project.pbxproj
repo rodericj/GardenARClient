@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5F18CEB624BAD78D00E10753 /* AddWorldButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F18CEB524BAD78D00E10753 /* AddWorldButton.swift */; };
+		5F18CEB624BAD78D00E10753 /* AddSpaceButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F18CEB524BAD78D00E10753 /* AddSpaceButton.swift */; };
 		5F870B4C24C0FEC10007F644 /* ARViewTapExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F870B4B24C0FEC10007F644 /* ARViewTapExtension.swift */; };
 		5F870B4F24C0FF660007F644 /* ARKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F870B4E24C0FF660007F644 /* ARKit.framework */; };
 		5F870B5124C0FF6A0007F644 /* RealityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F870B5024C0FF6A0007F644 /* RealityKit.framework */; };
@@ -19,11 +19,11 @@
 		5F92348E24B981C60019EBE8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5F92348C24B981C60019EBE8 /* LaunchScreen.storyboard */; };
 		5F92349924B981C70019EBE8 /* GardenARClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F92349824B981C70019EBE8 /* GardenARClientTests.swift */; };
 		5F9234A424B981EE0019EBE8 /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9234A324B981EE0019EBE8 /* NetworkClient.swift */; };
-		5FA12A7C24BCCB6B00C6E059 /* NoSelectedWorldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA12A7B24BCCB6B00C6E059 /* NoSelectedWorldView.swift */; };
-		5FA12A7E24BCD2C800C6E059 /* WithSelectedWorldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA12A7D24BCD2C800C6E059 /* WithSelectedWorldView.swift */; };
+		5FA12A7C24BCCB6B00C6E059 /* NoSelectedSpaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA12A7B24BCCB6B00C6E059 /* NoSelectedSpaceView.swift */; };
+		5FA12A7E24BCD2C800C6E059 /* WithSelectedSpaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA12A7D24BCD2C800C6E059 /* WithSelectedSpaceView.swift */; };
 		5FC8F4AF24BAB6A300C3F87C /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */; };
-		5FC8F4B224BABCFD00C3F87C /* WorldListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B124BABCFD00C3F87C /* WorldListView.swift */; };
-		5FC8F4B424BABD8300C3F87C /* WorldRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B324BABD8200C3F87C /* WorldRow.swift */; };
+		5FC8F4B224BABCFD00C3F87C /* SpacesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B124BABCFD00C3F87C /* SpacesListView.swift */; };
+		5FC8F4B424BABD8300C3F87C /* SpaceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B324BABD8200C3F87C /* SpaceRow.swift */; };
 		5FEACEF524C10F600016F885 /* ARKitSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FEACEF424C10F600016F885 /* ARKitSceneDelegate.swift */; };
 		5FEACEF824C113040016F885 /* PlantSigns.reality in Resources */ = {isa = PBXBuildFile; fileRef = 5FEACEF724C113040016F885 /* PlantSigns.reality */; };
 		5FEACEFA24C263910016F885 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FEACEF924C263910016F885 /* Anchor.swift */; };
@@ -40,7 +40,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		5F18CEB524BAD78D00E10753 /* AddWorldButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWorldButton.swift; sourceTree = "<group>"; };
+		5F18CEB524BAD78D00E10753 /* AddSpaceButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSpaceButton.swift; sourceTree = "<group>"; };
 		5F870B4B24C0FEC10007F644 /* ARViewTapExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewTapExtension.swift; sourceTree = "<group>"; };
 		5F870B4E24C0FF660007F644 /* ARKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ARKit.framework; path = System/Library/Frameworks/ARKit.framework; sourceTree = SDKROOT; };
 		5F870B5024C0FF6A0007F644 /* RealityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RealityKit.framework; path = System/Library/Frameworks/RealityKit.framework; sourceTree = SDKROOT; };
@@ -56,11 +56,11 @@
 		5F92349824B981C70019EBE8 /* GardenARClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenARClientTests.swift; sourceTree = "<group>"; };
 		5F92349A24B981C70019EBE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5F9234A324B981EE0019EBE8 /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
-		5FA12A7B24BCCB6B00C6E059 /* NoSelectedWorldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoSelectedWorldView.swift; sourceTree = "<group>"; };
-		5FA12A7D24BCD2C800C6E059 /* WithSelectedWorldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithSelectedWorldView.swift; sourceTree = "<group>"; };
+		5FA12A7B24BCCB6B00C6E059 /* NoSelectedSpaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoSelectedSpaceView.swift; sourceTree = "<group>"; };
+		5FA12A7D24BCD2C800C6E059 /* WithSelectedSpaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithSelectedSpaceView.swift; sourceTree = "<group>"; };
 		5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
-		5FC8F4B124BABCFD00C3F87C /* WorldListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldListView.swift; sourceTree = "<group>"; };
-		5FC8F4B324BABD8200C3F87C /* WorldRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorldRow.swift; sourceTree = "<group>"; };
+		5FC8F4B124BABCFD00C3F87C /* SpacesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacesListView.swift; sourceTree = "<group>"; };
+		5FC8F4B324BABD8200C3F87C /* SpaceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceRow.swift; sourceTree = "<group>"; };
 		5FEACEF424C10F600016F885 /* ARKitSceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARKitSceneDelegate.swift; sourceTree = "<group>"; };
 		5FEACEF724C113040016F885 /* PlantSigns.reality */ = {isa = PBXFileReference; lastKnownFileType = file; path = PlantSigns.reality; sourceTree = "<group>"; };
 		5FEACEF924C263910016F885 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
@@ -171,11 +171,11 @@
 			children = (
 				5F870B4A24C0FEAC0007F644 /* Utility */,
 				5F92348324B981C30019EBE8 /* ContentView.swift */,
-				5FC8F4B124BABCFD00C3F87C /* WorldListView.swift */,
-				5FC8F4B324BABD8200C3F87C /* WorldRow.swift */,
-				5F18CEB524BAD78D00E10753 /* AddWorldButton.swift */,
-				5FA12A7B24BCCB6B00C6E059 /* NoSelectedWorldView.swift */,
-				5FA12A7D24BCD2C800C6E059 /* WithSelectedWorldView.swift */,
+				5FC8F4B124BABCFD00C3F87C /* SpacesListView.swift */,
+				5FC8F4B324BABD8200C3F87C /* SpaceRow.swift */,
+				5F18CEB524BAD78D00E10753 /* AddSpaceButton.swift */,
+				5FA12A7B24BCCB6B00C6E059 /* NoSelectedSpaceView.swift */,
+				5FA12A7D24BCD2C800C6E059 /* WithSelectedSpaceView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -294,19 +294,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5FA12A7E24BCD2C800C6E059 /* WithSelectedWorldView.swift in Sources */,
+				5FA12A7E24BCD2C800C6E059 /* WithSelectedSpaceView.swift in Sources */,
 				5FC8F4AF24BAB6A300C3F87C /* ViewModel.swift in Sources */,
-				5FC8F4B424BABD8300C3F87C /* WorldRow.swift in Sources */,
+				5FC8F4B424BABD8300C3F87C /* SpaceRow.swift in Sources */,
 				5F870B4C24C0FEC10007F644 /* ARViewTapExtension.swift in Sources */,
-				5FC8F4B224BABCFD00C3F87C /* WorldListView.swift in Sources */,
+				5FC8F4B224BABCFD00C3F87C /* SpacesListView.swift in Sources */,
 				5F92348424B981C30019EBE8 /* ContentView.swift in Sources */,
-				5F18CEB624BAD78D00E10753 /* AddWorldButton.swift in Sources */,
+				5F18CEB624BAD78D00E10753 /* AddSpaceButton.swift in Sources */,
 				5FEACEF524C10F600016F885 /* ARKitSceneDelegate.swift in Sources */,
 				5F92348224B981C30019EBE8 /* AppDelegate.swift in Sources */,
 				5F92348624B981C30019EBE8 /* Experience.rcproject in Sources */,
 				5FEACEFA24C263910016F885 /* Anchor.swift in Sources */,
 				5F9234A424B981EE0019EBE8 /* NetworkClient.swift in Sources */,
-				5FA12A7C24BCCB6B00C6E059 /* NoSelectedWorldView.swift in Sources */,
+				5FA12A7C24BCCB6B00C6E059 /* NoSelectedSpaceView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

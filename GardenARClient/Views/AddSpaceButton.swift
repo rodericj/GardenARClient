@@ -1,5 +1,5 @@
 //
-//  AddWorldButton.swift
+//  AddSpaceButton.swift
 //  GardenARClient
 //
 //  Created by Roderic Campbell on 7/11/20.
@@ -64,22 +64,22 @@ extension UIView {
     }
 }
 
-struct AddWorldButton: View {
+struct AddSpaceButton: View {
     @EnvironmentObject var viewModel: ViewModel
 
     var body: some View {
         VStack {
             Spacer()
             Button(action: {
-                UIView.creationAlert(title: "Add a new World", placeholder: "The Backyard") { text in
+                UIView.creationAlert(title: "Add a new Space", placeholder: "The Backyard") { text in
                     do {
-                        try self.viewModel.makeWorld(named: text)
+                        try self.viewModel.makeSpace(named: text)
                     } catch {
-                        print("There was an error in sending the network request to create the world. \(error)")
+                        print("There was an error in sending the network request to create the space. \(error)")
                     }
                 }
             }) {
-                Text("+ New World")
+                Text("+ New Space")
                     .fontWeight(.heavy)
                     .font(.title)
                     .padding()
@@ -91,9 +91,9 @@ struct AddWorldButton: View {
     }
 }
 
-struct AddWorldButton_Previews: PreviewProvider {
+struct AddSpaceButton_Previews: PreviewProvider {
     static var previews: some View {
         let viewModel = ViewModel(networkClient: NetworkClient())
-        return AddWorldButton().environmentObject(viewModel)
+        return AddSpaceButton().environmentObject(viewModel)
     }
 }
