@@ -71,13 +71,7 @@ struct AddSpaceButton: View {
         VStack {
             Spacer()
             Button(action: {
-                UIView.creationAlert(title: "Add a new Space", placeholder: "The Backyard") { text in
-                    do {
-                        try self.viewModel.makeSpace(named: text)
-                    } catch {
-                        print("There was an error in sending the network request to create the space. \(error)")
-                    }
-                }
+                self.viewModel.showingAlert = .showing("Add a new Space")
             }) {
                 Text("+ New Space")
                     .fontWeight(.heavy)

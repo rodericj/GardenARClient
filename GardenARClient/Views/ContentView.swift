@@ -28,7 +28,14 @@ struct ContentView : View {
             } else {
                WithSelectedSpaceView()
             }
-
+            if viewModel.showingAlert != .notShowing {
+                ZStack {
+                    Rectangle()
+                        .fill(Color.black.opacity(0.4))
+                        .edgesIgnoringSafeArea(.all)
+                    AlertView()
+                }
+            }
         }
         .onAppear(perform: viewModel.getSpaces)
     }
@@ -67,9 +74,24 @@ struct ContentView_Previews : PreviewProvider {
 
         let viewModelWithOutSelected = ViewModel(networkClient: NetworkClient())
 
+        let viewModelShowingAlert = ViewModel(networkClient: NetworkClient())
+        viewModelShowingAlert.showingAlert = .showing("Hello there")
+
+        let viewModelShowingListNoAlert = ViewModel(networkClient: NetworkClient())
+        viewModelShowingListNoAlert.selectedSpace = nil
+
+        let viewModelShowingListAndAlert = ViewModel(networkClient: NetworkClient())
+        viewModelShowingListAndAlert.selectedSpace = nil
+        viewModelShowingListAndAlert.spaces = [SpaceInfo(title: "Banana", id: UUID())]
+        viewModelShowingListAndAlert.showingAlert = .showing("Hello there")
+
         return Group {
             ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelWithOutSelected)
             ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelWithSelected)
+            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelShowingAlert)
+            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelShowingListNoAlert)
+            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelShowingListAndAlert)
+            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelShowingListAndAlert).environment(\.colorScheme, .dark)
         }
     }
 }

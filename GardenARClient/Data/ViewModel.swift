@@ -18,10 +18,16 @@ enum DataOrLoading {
     case spaces([SpaceInfo])
 }
 
+enum AlertModel: Equatable {
+    case notShowing
+    case showing(String)
+}
+
 class ViewModel: ObservableObject, Identifiable {
     private let networkClient: NetworkFetching
     private var disposables = Set<AnyCancellable>()
-    
+
+    @Published var showingAlert: AlertModel = .notShowing
     @Published var spaces: [SpaceInfo] = []
     @Published var selectedSpace: SpaceInfo? = nil {
         didSet {
