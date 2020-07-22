@@ -22,8 +22,8 @@ struct WithSelectedSpaceView: View {
                         .fontWeight(.heavy)
                         .font(.title)
                         .padding()
-                        .foregroundColor(.black)
-                        .background(Color.white)
+                        .foregroundColor(.white)
+                        .background(Color.blue)
                         .cornerRadius(40)
                 }
                 Spacer()
