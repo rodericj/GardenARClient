@@ -8,7 +8,9 @@
 
 import Foundation
 import Combine
-
+import ARKit
+import RealityKit
+import SwiftUI
 enum ViewModelError: Error {
     case noSpaceSelected
 }
@@ -27,7 +29,10 @@ class ViewModel: ObservableObject, Identifiable {
     private let networkClient: NetworkFetching
     private var disposables = Set<AnyCancellable>()
 
-    @Published var showingAlert: AlertModel = .notShowing
+
+    var arView: ARView?
+    @Published var alertViewOutput: String = ""
+    @Published var showingAlert: AlertType = .none
     @Published var spaces: [SpaceInfo] = []
     @Published var selectedSpace: SpaceInfo? = nil {
         didSet {
@@ -40,9 +45,58 @@ class ViewModel: ObservableObject, Identifiable {
     }
 
     @Published var anchors: [Anchor] = []
+    var loadedPlantSignScene: PlantSigns.SignScene?
 
+    func loadScene(viewHolder: HasOptionalARView) {
+        
+        PlantSigns.loadSignSceneAsync { result in
+
+            switch result {
+            // this plantEntity holds is the entity we will add to the AnchorEntity
+            case .success(let plantSignScene):
+                self.loadedPlantSignScene = plantSignScene
+                self.arView?.scene.addAnchor(plantSignScene)
+            case .failure(let fetchModelError):
+                fatalError("🔴 Error loading plant signs async: \(fetchModelError)")
+            }
+        }
+    }
+
+    let signAnchorNameIdentifier = "This Is the anchor Entity you are looking for. We added the plantSignScene to this"
+    var pendingAnchorEntityLookup: [ARAnchor : AnchorEntity] = [:]
+    var pendingAnchorEntitySet =  Set<AnchorEntity>()
     init(networkClient: NetworkFetching) {
-      self.networkClient = networkClient
+        self.networkClient = networkClient
+
+
+        $alertViewOutput.sink { string in
+            switch self.showingAlert {
+            case .createSpace(_):
+                try? self.makeSpace(named: string)
+            case .createMarker(_, let arView, let raycastResult):
+                // This is us adding the full scene to the
+                guard let clonedPlantSign = self.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
+                    print("no plant sign entity")
+                    return
+                }
+                guard let raycastResult = raycastResult else { return }
+
+                let anchorEntity = AnchorEntity(world: raycastResult.worldTransform)
+                anchorEntity.name = self.signAnchorNameIdentifier
+                anchorEntity.addChild(clonedPlantSign)
+
+                // 5. add an occlusion plane to the anchor for when the sign is down below
+//                anchorEntity.addOcclusionBox()
+
+                // 6. Set the sign text
+                clonedPlantSign.updatePlantSignName(name: string)
+
+                print("// 7. add the anchor to the arView")
+                arView.scene.addAnchor(anchorEntity)
+            case .none:
+                print("no-op")
+            }
+        }.store(in: &disposables)
     }
 
     func deleteSpace(at offsets: IndexSet) {
@@ -139,6 +193,5 @@ class ViewModel: ObservableObject, Identifiable {
             })
             .store(in: &disposables)
     }
-
 }
 

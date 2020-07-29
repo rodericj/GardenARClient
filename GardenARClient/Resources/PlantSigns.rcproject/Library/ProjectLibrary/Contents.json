@@ -18,5 +18,15 @@
     "libraryIdentifier" : "96c517760370ace7c8066ac7ffbf6ce6",
     "format" : "model",
     "displayName" : "courtA_tabletop_monorail.usdz"
+  },
+  {
+    "libraryIdentifier" : "0a7199f0ad048944e128b20e6c857878",
+    "format" : "audio",
+    "displayName" : "Error 5.m4a"
+  },
+  {
+    "libraryIdentifier" : "c8b94c93f2fd16bd139bc9420e4322b2",
+    "format" : "audio",
+    "displayName" : "Complete 1.m4a"
   }
 ]

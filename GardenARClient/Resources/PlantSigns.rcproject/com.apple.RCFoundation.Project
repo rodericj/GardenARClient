@@ -107,7 +107,7 @@
                       "isEnabled" : true,
                       "isLooping" : true,
                       "isModal" : false,
-                      "name" : "Behavior",
+                      "name" : "Facing",
                       "triggers" : [
                         {
                           "__content" : [
@@ -201,7 +201,7 @@
                         1
                       ],
                       "identifier" : "6331BC7D-C729-48E2-B4D7-027955713FF3",
-                      "isEnabled" : true,
+                      "isEnabled" : false,
                       "isLooping" : false,
                       "isModal" : false,
                       "name" : "More Info Slide Up When close",
@@ -317,6 +317,37 @@
                             }
                           ],
                           "__version" : 1
+                        },
+                        {
+                          "__content" : [
+                            {
+                              "configurations" : [
+                                {
+                                  "__content" : [
+                                    {
+                                      "configurationBox" : {
+                                        "configuration" : {
+                                          "target" : [
+                                            "DFCC3F74-7D2B-4208-8AFA-99379D03EE89"
+                                          ],
+                                          "userIdentifier" : "Second Info Slide Up"
+                                        },
+                                        "name" : {
+                                          "type" : "custom"
+                                        }
+                                      },
+                                      "identifier" : "012B9595-0104-484E-B9A1-03AF0756FAF8",
+                                      "isEnabled" : true
+                                    }
+                                  ],
+                                  "__version" : 1
+                                }
+                              ],
+                              "identifier" : "C2892D7C-EE80-4741-9CE5-52E1E7B8B16D",
+                              "isEnabled" : true
+                            }
+                          ],
+                          "__version" : 1
                         }
                       ],
                       "color" : [
@@ -326,7 +357,7 @@
                         1
                       ],
                       "identifier" : "A2F005E8-157E-4612-A575-613F14C6DDAB",
-                      "isEnabled" : true,
+                      "isEnabled" : false,
                       "isLooping" : false,
                       "isModal" : false,
                       "name" : "Second Info Slide Up",
@@ -451,7 +482,7 @@
                         1
                       ],
                       "identifier" : "4F78EFA8-2ECA-402A-9F59-7D07712F967C",
-                      "isEnabled" : true,
+                      "isEnabled" : false,
                       "isLooping" : false,
                       "isModal" : false,
                       "name" : "Third Info Slide Up",
@@ -503,101 +534,7 @@
                                         "configuration" : {
                                           "angularCoefficient" : 1,
                                           "animationStyle" : "basic",
-                                          "buildInAnimationType" : "move in from below",
-                                          "distance" : 0.25,
-                                          "duration" : 0.30000001192092896,
-                                          "fadeIn" : true,
-                                          "linearCoefficient" : 1,
-                                          "moveEase" : "easeInOut",
-                                          "respectPhysics" : false,
-                                          "target" : [
-                                            "74E9DC9A-0120-43E3-A04D-0F3796D42481",
-                                            "785DB05B-EDAC-48BC-AAD3-ACF1E12904AC",
-                                            "06342683-0772-4232-8056-1E5F7374387B",
-                                            "DFCC3F74-7D2B-4208-8AFA-99379D03EE89"
-                                          ]
-                                        },
-                                        "name" : {
-                                          "type" : "show"
-                                        }
-                                      },
-                                      "identifier" : "F8B9AF7B-EC14-488C-A133-914795BE3628",
-                                      "isEnabled" : true
-                                    }
-                                  ],
-                                  "__version" : 1
-                                }
-                              ],
-                              "identifier" : "B14D2798-85AE-48E4-AA77-D38ABEE97CFB",
-                              "isEnabled" : true
-                            }
-                          ],
-                          "__version" : 1
-                        }
-                      ],
-                      "color" : [
-                        0.364705890417099,
-                        0.74117648601531982,
-                        0.69019609689712524,
-                        1
-                      ],
-                      "identifier" : "DBC8AF4D-AEBC-46EB-9DEA-D6DD28F78023",
-                      "isEnabled" : true,
-                      "isLooping" : false,
-                      "isModal" : false,
-                      "name" : "Show When Close",
-                      "triggers" : [
-                        {
-                          "__content" : [
-                            {
-                              "configurationBox" : {
-                                "configuration" : {
-                                  "distance" : 3.0345158576965332,
-                                  "target" : [
-                                    "74E9DC9A-0120-43E3-A04D-0F3796D42481",
-                                    "785DB05B-EDAC-48BC-AAD3-ACF1E12904AC",
-                                    "06342683-0772-4232-8056-1E5F7374387B",
-                                    "DFCC3F74-7D2B-4208-8AFA-99379D03EE89"
-                                  ],
-                                  "type" : 0
-                                },
-                                "name" : "proximity"
-                              },
-                              "identifier" : "B38CD802-1CFA-4F63-80A9-EBC84D4ECB24",
-                              "isEnabled" : true
-                            }
-                          ],
-                          "__version" : 1
-                        }
-                      ]
-                    }
-                  ],
-                  "__version" : 3
-                },
-                {
-                  "__content" : [
-                    {
-                      "accessibility" : {
-                        "__content" : [
-                          {
-                            "isEnabled" : false
-                          }
-                        ],
-                        "__version" : 1
-                      },
-                      "actionGroups" : [
-                        {
-                          "__content" : [
-                            {
-                              "configurations" : [
-                                {
-                                  "__content" : [
-                                    {
-                                      "configurationBox" : {
-                                        "configuration" : {
-                                          "angularCoefficient" : 1,
-                                          "animationStyle" : "basic",
-                                          "buildOutAnimationType" : "move out to below",
+                                          "buildOutAnimationType" : "none",
                                           "distance" : 1,
                                           "duration" : 0,
                                           "fadeOut" : true,
@@ -606,9 +543,9 @@
                                           "respectPhysics" : false,
                                           "target" : [
                                             "DFCC3F74-7D2B-4208-8AFA-99379D03EE89",
+                                            "06342683-0772-4232-8056-1E5F7374387B",
                                             "785DB05B-EDAC-48BC-AAD3-ACF1E12904AC",
-                                            "74E9DC9A-0120-43E3-A04D-0F3796D42481",
-                                            "06342683-0772-4232-8056-1E5F7374387B"
+                                            "74E9DC9A-0120-43E3-A04D-0F3796D42481"
                                           ]
                                         },
                                         "name" : {
@@ -684,17 +621,14 @@
                                         "configuration" : {
                                           "angularCoefficient" : 1,
                                           "animationStyle" : "basic",
-                                          "buildOutAnimationType" : "move out to below",
-                                          "distance" : 1,
-                                          "duration" : 0.30000001192092896,
+                                          "buildOutAnimationType" : "pop",
+                                          "distance" : 0.24963858723640442,
+                                          "duration" : 0.31999999284744263,
                                           "fadeOut" : true,
                                           "linearCoefficient" : 1,
-                                          "moveEase" : "easeInOut",
+                                          "moveEase" : "none",
                                           "respectPhysics" : false,
                                           "target" : [
-                                            "74E9DC9A-0120-43E3-A04D-0F3796D42481",
-                                            "785DB05B-EDAC-48BC-AAD3-ACF1E12904AC",
-                                            "06342683-0772-4232-8056-1E5F7374387B",
                                             "DFCC3F74-7D2B-4208-8AFA-99379D03EE89"
                                           ]
                                         },
@@ -726,18 +660,182 @@
                       "isEnabled" : false,
                       "isLooping" : false,
                       "isModal" : false,
-                      "name" : "Behavior 1",
+                      "name" : "Notification Camera Far Away Trigger",
                       "triggers" : [
                         {
                           "__content" : [
                             {
                               "configurationBox" : {
                                 "configuration" : {
-                                  "userIdentifier" : "CameraFarAway"
+                                  "userIdentifier" : "far"
                                 },
                                 "name" : "custom"
                               },
                               "identifier" : "402A6F48-A6F0-45FA-8041-D45E794D85F1",
+                              "isEnabled" : true
+                            }
+                          ],
+                          "__version" : 1
+                        }
+                      ]
+                    }
+                  ],
+                  "__version" : 3
+                },
+                {
+                  "__content" : [
+                    {
+                      "accessibility" : {
+                        "__content" : [
+                          {
+                            "isEnabled" : false
+                          }
+                        ],
+                        "__version" : 1
+                      },
+                      "actionGroups" : [
+                        {
+                          "__content" : [
+                            {
+                              "configurations" : [
+                                {
+                                  "__content" : [
+                                    {
+                                      "configurationBox" : {
+                                        "configuration" : {
+                                          "angularCoefficient" : 1,
+                                          "animationStyle" : "basic",
+                                          "buildInAnimationType" : "pop",
+                                          "distance" : 0.25,
+                                          "duration" : 0.73000001907348633,
+                                          "fadeIn" : true,
+                                          "linearCoefficient" : 1,
+                                          "moveEase" : "none",
+                                          "respectPhysics" : false,
+                                          "target" : [
+                                            "DFCC3F74-7D2B-4208-8AFA-99379D03EE89"
+                                          ]
+                                        },
+                                        "name" : {
+                                          "type" : "show"
+                                        }
+                                      },
+                                      "identifier" : "4A21246D-39BA-4049-B702-DDEC6D3B1966",
+                                      "isEnabled" : true
+                                    }
+                                  ],
+                                  "__version" : 1
+                                }
+                              ],
+                              "identifier" : "F216B13D-2B0B-4067-8532-1A70F61CCF92",
+                              "isEnabled" : true
+                            }
+                          ],
+                          "__version" : 1
+                        }
+                      ],
+                      "color" : [
+                        0.49803921580314636,
+                        0.52941179275512695,
+                        0.61960786581039429,
+                        1
+                      ],
+                      "identifier" : "84502891-2D86-4049-A890-7A1A2F69338B",
+                      "isEnabled" : false,
+                      "isLooping" : false,
+                      "isModal" : false,
+                      "name" : "Notification Camera Close Trigger",
+                      "triggers" : [
+                        {
+                          "__content" : [
+                            {
+                              "configurationBox" : {
+                                "configuration" : {
+                                  "userIdentifier" : "near"
+                                },
+                                "name" : "custom"
+                              },
+                              "identifier" : "81AD346E-4FB1-449C-B962-F7840C992771",
+                              "isEnabled" : true
+                            }
+                          ],
+                          "__version" : 1
+                        }
+                      ]
+                    }
+                  ],
+                  "__version" : 3
+                },
+                {
+                  "__content" : [
+                    {
+                      "accessibility" : {
+                        "__content" : [
+                          {
+                            "isEnabled" : false
+                          }
+                        ],
+                        "__version" : 1
+                      },
+                      "actionGroups" : [
+                        {
+                          "__content" : [
+                            {
+                              "configurations" : [
+                                {
+                                  "__content" : [
+                                    {
+                                      "configurationBox" : {
+                                        "configuration" : {
+                                          "target" : [
+                                            "DFCC3F74-7D2B-4208-8AFA-99379D03EE89"
+                                          ],
+                                          "userIdentifier" : "Proximity50cm"
+                                        },
+                                        "name" : {
+                                          "type" : "custom"
+                                        }
+                                      },
+                                      "identifier" : "3CD65147-F557-490E-B05E-2858D432B36F",
+                                      "isEnabled" : true
+                                    }
+                                  ],
+                                  "__version" : 1
+                                }
+                              ],
+                              "identifier" : "D277AC7B-E65B-464C-A31A-99AAB9131C1F",
+                              "isEnabled" : true
+                            }
+                          ],
+                          "__version" : 1
+                        }
+                      ],
+                      "color" : [
+                        0.364705890417099,
+                        0.74117648601531982,
+                        0.69019609689712524,
+                        1
+                      ],
+                      "identifier" : "9C7ADDCC-F4C3-4514-BDA5-8F65FA225051",
+                      "isEnabled" : true,
+                      "isLooping" : false,
+                      "isModal" : false,
+                      "name" : "Behavior",
+                      "triggers" : [
+                        {
+                          "__content" : [
+                            {
+                              "configurationBox" : {
+                                "configuration" : {
+                                  "distance" : 0.5,
+                                  "target" : [
+                                    "DFCC3F74-7D2B-4208-8AFA-99379D03EE89"
+                                  ],
+                                  "type" : 0
+                                },
+                                "name" : "proximity"
+                              },
+                              "identifier" : "AFE83283-8F34-4CF2-8509-1C8BCF570AE7",
                               "isEnabled" : true
                             }
                           ],
@@ -924,7 +1022,7 @@
                           "entityName",
                           {
                             "typeName" : "String",
-                            "value" : "PlantSignAnchor"
+                            "value" : "PlantSignEntityToAttach"
                           }
                         ],
                         [
@@ -1138,7 +1236,7 @@
                           "entityName",
                           {
                             "typeName" : "String",
-                            "value" : "PlantSign"
+                            "value" : "PlantSignExtraTop"
                           }
                         ],
                         [
@@ -1352,7 +1450,7 @@
                           "entityName",
                           {
                             "typeName" : "String",
-                            "value" : "PlantSign"
+                            "value" : "PlantSignExtraBottom"
                           }
                         ],
                         [
@@ -1566,7 +1664,7 @@
                           "entityName",
                           {
                             "typeName" : "String",
-                            "value" : "PlantSign"
+                            "value" : "PlantSignExtraMiddle"
                           }
                         ],
                         [
@@ -1636,21 +1734,21 @@
               "title" : "SignScene",
               "viewTransform" : {
                 "cameraTransform" : [
-                  0.95569306612014771,
-                  -2.9336661100387573e-08,
-                  -0.29436495900154114,
+                  -0.48662674427032471,
+                  -1.4901158529312397e-08,
+                  0.87360984086990356,
                   0,
-                  -0.12969233095645905,
-                  0.89771157503128052,
-                  -0.4210626482963562,
+                  0.12786868214607239,
+                  0.98923015594482422,
+                  0.071226641535758972,
                   0,
-                  0.26425448060035706,
-                  0.44058376550674438,
-                  0.85793673992156982,
+                  -0.86420130729675293,
+                  0.14636830985546112,
+                  -0.48138576745986938,
                   0,
-                  0.60381972789764404,
-                  1.1120477914810181,
-                  1.8149935007095337,
+                  -0.55290567874908447,
+                  0.13328546285629272,
+                  -0.32880741357803345,
                   1
                 ],
                 "sceneTransform" : [

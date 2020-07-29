@@ -8,18 +8,39 @@
 
 import SwiftUI
 import Combine
+import ARKit
+import RealityKit
+enum AlertType {
+
+    case none
+    case createSpace(String)
+    case createMarker(String, ARView, ARRaycastResult?)
+
+    var title: String {
+        get {
+            switch self {
+            case .createMarker(let title, _, _):
+                return title
+            case .createSpace(let title):
+                return title
+            case .none:
+                return ""
+            }
+        }
+    }
+}
 
 struct AlertView: View {
     @State var enteredText: String = ""
     @EnvironmentObject var viewModel: ViewModel
     @State private var keyboardHeight: CGFloat = 0
-
+    let alertType: AlertType
     var body: some View {
         return VStack {
             Spacer()
             VStack {
                 Spacer().frame(width: 0, height: 20, alignment: .center)
-                Text("Enter new Space Name").foregroundColor(.accentColor)
+                Text(alertType.title).foregroundColor(.accentColor)
 
                 TextField("Backyard", text: $enteredText)
                     .foregroundColor(.primary).colorInvert()
@@ -33,7 +54,7 @@ struct AlertView: View {
                     .padding(10)
                 HStack {
                     Button(action: {
-                        self.viewModel.showingAlert = .notShowing
+                        self.viewModel.showingAlert = .none
                     }) {
                         Text("Cancel")
                             .padding()
@@ -43,9 +64,8 @@ struct AlertView: View {
                             .cornerRadius(5)
                     }.padding(10)
                     Button(action: {
-                        print("ok")
-                        try? self.viewModel.makeSpace(named: self.enteredText)
-                        self.viewModel.showingAlert = .notShowing
+                        self.viewModel.alertViewOutput = self.enteredText
+                        self.viewModel.showingAlert = .none
                     }) {
                         Text("Ok")
                             .padding()
@@ -72,8 +92,8 @@ struct AlertView: View {
 struct AlertView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            AlertView().environment(\.colorScheme, .light)
-            AlertView().environment(\.colorScheme, .dark)
+            AlertView(alertType: .createMarker("Enter new Space Name", ARView(), nil)).environment(\.colorScheme, .light)
+            AlertView(alertType: .createMarker("Enter new Space Name", ARView(),  nil)).environment(\.colorScheme, .dark)
         }
     }
 }

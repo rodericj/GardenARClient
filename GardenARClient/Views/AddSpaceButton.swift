@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Combine
 
 extension UIView {
 
@@ -66,20 +67,13 @@ extension UIView {
 
 struct AddSpaceButton: View {
     @EnvironmentObject var viewModel: ViewModel
-
     var body: some View {
         VStack {
             Spacer()
             Button(action: {
-                self.viewModel.showingAlert = .showing("Add a new Space")
+                self.viewModel.showingAlert = .createSpace("Add a new Space")
             }) {
-                Text("+ New Space")
-                    .fontWeight(.heavy)
-                    .font(.title)
-                    .padding()
-                    .foregroundColor(.white)
-                    .background(Color.blue)
-                    .cornerRadius(40)
+                CTAButtonView(title: "+ New Space")
             }
         }.padding()
     }

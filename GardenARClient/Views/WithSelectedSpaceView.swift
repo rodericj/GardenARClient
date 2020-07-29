@@ -18,13 +18,9 @@ struct WithSelectedSpaceView: View {
                 Button(action: {
                     self.viewModel.selectedSpace = nil
                 }) {
-                    Text("Space: \(viewModel.selectedSpace?.title ?? "")")
-                        .fontWeight(.heavy)
-                        .font(.title)
-                        .padding()
-                        .foregroundColor(.white)
-                        .background(Color.blue)
-                        .cornerRadius(40)
+                    VStack {
+                        CTAButtonView(title: "Space: \(viewModel.selectedSpace?.title ?? "")")
+                    }
                 }
                 Spacer()
             }
