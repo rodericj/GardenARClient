@@ -142,71 +142,63 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
 //        print("ARDelegate object didAdd \(anchors.count) anchors")
 
-        anchors.forEach { thisAnchor in
-            if let _ = thisAnchor as? AREnvironmentProbeAnchor {
-                return
-            }
-            return // TODO Ok this is me defaulting to NOT add entities from the network. obvoiusly i can't leave this here
-            let a = 1
-            // Check if there are any pending anchor entity's in the lookup. This may not be necessary anymore
-            guard let anchorEntity = viewModel.pendingAnchorEntityLookup[thisAnchor] else {
+        anchors
+            .filter { $0.name?.hasPrefix("RemoteUUID-") ?? false }
+            .forEach { newlyAddedARKitAnchor in
 
-                print("this anchor is not tied to a pending reality kit anchor entity which means it came from the network probably")
-                guard let plantSignEntityToAttach = viewModel.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
-                    print("No plantSignScene was loaded")
+                // Check if there are any pending anchor entity's in the lookup. This may not be necessary anymore
+                print("thisAnchor \(newlyAddedARKitAnchor)")
+                guard let anchorEntityContainingSignEntityAndStringTuple = viewModel.pendingAnchorEntityLookup[newlyAddedARKitAnchor] else {
+
+                    print("this anchor is not tied to a pending reality kit anchor entity which means it came from the network probably")
+                    guard let plantSignEntityToAttach = viewModel.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
+                        print("No plantSignScene was loaded")
+                        return
+                    }
+                    if let plantName = newlyAddedARKitAnchor.name {
+                        plantSignEntityToAttach.name = plantName
+                    }
+                    // 4. Add the newly loaded plantSign to the anchor
+                    #if !targetEnvironment(simulator)
+
+                    let anchorEntity = AnchorEntity(anchor: newlyAddedARKitAnchor)
+                    anchorEntity.addChild(plantSignEntityToAttach)
+                    //                // 5. add an occlusion plane to the anchor for when the sign is down below
+                    //                anchorEntity.addOcclusionBox()
+
+                    // 6. Set the sign text
+                    //plantSignScene.plantSignAnchor?.updatePlantSignName(name: plantName ?? "Name should have come in on the anchor")
+
+                    // TODO this part might be a bit odd. We are adding it to the arView's scene AND session. I think this isn't correct. I think we need to move one to another place
+                    print("// 7. add the anchor to the arView")
+                    self.viewModel.arView?.scene.anchors.append(anchorEntity)
+                    #endif
+
                     return
                 }
-//                print("I think this is what we want to add to the anchors: \(plantSignScene.plantSignAnchorToAttach)")
-//                guard let plantSignEntity = plantSignScene.plantSignAnchor else {
-//                    print("🔴 Plant sign entitty did not exist")
-//                    return
-//                }
-                if let plantName = thisAnchor.name {
-                    plantSignEntityToAttach.name = plantName
+                print("we found a match \(anchorEntityContainingSignEntityAndStringTuple.0.name)")
+                let plantName = anchorEntityContainingSignEntityAndStringTuple.1
+                // 8. Need to get the world map then verify that this new thing is on there.
+                // 8a. At this point we actually need to wait until we get a signal that the anchors have changed. To the delegate!
+                viewModel.arView?.session.getCurrentWorldMap { (map, getWorldMapError) in
+
+                    if let error = getWorldMapError {
+                        print("🔴 Error fetching the world map. \(error)")
+                        return
+                    }
+                    guard let map = map else {
+                        print("🔴 Couldn't fetch the world map, but no error.")
+                        return
+                    }
+
+                    do {
+                        // TODO we need ot pass the REMOTEUUID here over to the server
+                        try self.processFetchedWorldMap(map: map, plantName: plantName, anchorEntityContainingSignEntity: anchorEntityContainingSignEntityAndStringTuple.0)
+                    } catch {
+                        print("Unable to process the FetchedWorldMap \(error)")
+                    }
+
                 }
-                // 4. Add the newly loaded plantSign to the anchor
-                let anchorEntity = AnchorEntity(anchor: thisAnchor)
-                anchorEntity.addChild(plantSignEntityToAttach)
-//
-//
-//                // 5. add an occlusion plane to the anchor for when the sign is down below
-//                anchorEntity.addOcclusionBox()
-
-                // 6. Set the sign text
-                //plantSignScene.plantSignAnchor?.updatePlantSignName(name: plantName ?? "Name should have come in on the anchor")
-
-                // TODO this part might be a bit odd. We are adding it to the arView's scene AND session. I think this isn't correct. I think we need to move one to another place
-                print("// 7. add the anchor to the arView")
-                self.viewModel.arView?.scene.anchors.append(anchorEntity)
-
-                return
-            }
-            print("we found a match \(anchorEntity.name)")
-            guard let plantName = thisAnchor.name else {
-                print("We need to name this anchor")
-                return 
-            }
-            // 8. Need to get the world map then verify that this new thing is on there.
-            // 8a. At this point we actually need to wait until we get a signal that the anchors have changed. To the delegate!
-            viewModel.arView?.session.getCurrentWorldMap { (map, getWorldMapError) in
-
-                if let error = getWorldMapError {
-                    print("🔴 Error fetching the world map. \(error)")
-                    return
-                }
-                guard let map = map else {
-                    print("🔴 Couldn't fetch the world map, but no error.")
-                    return
-                }
-
-                do {
-                    try self.processFetchedWorldMap(map: map, plantName: plantName, anchorEntity: anchorEntity)
-                } catch {
-                    print("Unable to process the FetchedWorldMap \(error)")
-                }
-
-            }
-
         }
 
         // Handle the new "named anchor" which gets added from an unnamed anchor above
@@ -300,21 +292,21 @@ extension ARDelegate {
      * - Parameter plantName: The name of the anchor we're sending to the view model
      * - Parameter anchorEntity: In the case of an error we will need to remove this anchor
      */
-    private func processFetchedWorldMap(map: ARWorldMap, plantName: String, anchorEntity: AnchorEntity) throws {
-        guard let anchorID = anchorEntity.anchorIdentifier
+    private func processFetchedWorldMap(map: ARWorldMap, plantName: String, anchorEntityContainingSignEntity: AnchorEntity) throws {
+        guard let anchorID = anchorEntityContainingSignEntity.anchorIdentifier
             else {
-                self.viewModel.arView?.scene.removeAnchor(anchorEntity)
+                self.viewModel.arView?.scene.removeAnchor(anchorEntityContainingSignEntity)
             throw AnchorError.noUniqueIdentifier("We attempted to archive the world but the anchorEntity did not have an anchorIdentifier. It's optional but should be set when added to the session.")
         }
         if let worldData = try? NSKeyedArchiver.archivedData(withRootObject: map, requiringSecureCoding: true) {
             do {
                 try self.viewModel.addAnchor(anchorName: plantName, anchorID: anchorID, worldData: worldData)
             } catch {
-                self.viewModel.arView?.scene.removeAnchor(anchorEntity)
+                self.viewModel.arView?.scene.removeAnchor(anchorEntityContainingSignEntity)
                 print("Unable to add anchor to the server \(error)")
             }
         } else {
-            self.viewModel.arView?.scene.removeAnchor(anchorEntity)
+            self.viewModel.arView?.scene.removeAnchor(anchorEntityContainingSignEntity)
             print("no map data")
         }
         // If we have an error we need to remove the anchor

@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let viewModel = ViewModel(networkClient: NetworkClient())
         let arDelegate = ARDelegate(viewModel: viewModel)
         arDelegate.setupListeners()
-        viewModel.loadScene(viewHolder: arDelegate)
+        viewModel.loadScene()
         let contentView = ContentView(sceneDelegate: arDelegate).environmentObject(viewModel)
         // Use a UIHostingController as window root view controller.
         let window = UIWindow(frame: UIScreen.main.bounds)

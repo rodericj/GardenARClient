@@ -25,6 +25,22 @@ enum AlertModel: Equatable {
     case showing(String)
 }
 
+extension ViewModel {
+
+    func loadScene() {
+
+           PlantSigns.loadSignSceneAsync { result in
+               switch result {
+               // this plantEntity holds is the entity we will add to the AnchorEntity
+               case .success(let plantSignScene):
+                   self.loadedPlantSignScene = plantSignScene
+                   self.arView?.scene.addAnchor(plantSignScene)
+               case .failure(let fetchModelError):
+                   fatalError("🔴 Error loading plant signs async: \(fetchModelError)")
+               }
+           }
+       }
+}
 class ViewModel: ObservableObject, Identifiable {
     private let networkClient: NetworkFetching
     private var disposables = Set<AnyCancellable>()
@@ -47,23 +63,9 @@ class ViewModel: ObservableObject, Identifiable {
     @Published var anchors: [Anchor] = []
     var loadedPlantSignScene: PlantSigns.SignScene?
 
-    func loadScene(viewHolder: HasOptionalARView) {
-        
-        PlantSigns.loadSignSceneAsync { result in
-
-            switch result {
-            // this plantEntity holds is the entity we will add to the AnchorEntity
-            case .success(let plantSignScene):
-                self.loadedPlantSignScene = plantSignScene
-                self.arView?.scene.addAnchor(plantSignScene)
-            case .failure(let fetchModelError):
-                fatalError("🔴 Error loading plant signs async: \(fetchModelError)")
-            }
-        }
-    }
 
     let signAnchorNameIdentifier = "This Is the anchor Entity you are looking for. We added the plantSignScene to this"
-    var pendingAnchorEntityLookup: [ARAnchor : AnchorEntity] = [:]
+    var pendingAnchorEntityLookup: [ARAnchor : (AnchorEntity, String)] = [:]
     var pendingAnchorEntitySet =  Set<AnchorEntity>()
     init(networkClient: NetworkFetching) {
         self.networkClient = networkClient
@@ -74,6 +76,8 @@ class ViewModel: ObservableObject, Identifiable {
             case .createSpace(_):
                 try? self.makeSpace(named: string)
             case .createMarker(_, let arView, let raycastResult):
+                #if !targetEnvironment(simulator)
+
                 // This is us adding the full scene to the
                 guard let clonedPlantSign = self.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
                     print("no plant sign entity")
@@ -93,12 +97,38 @@ class ViewModel: ObservableObject, Identifiable {
 
                 print("// 7. add the anchor to the arView")
                 arView.scene.addAnchor(anchorEntity)
+                let arKitAnchor = ARAnchor(name: "RemoteUUID-\(UUID().uuidString)", transform: raycastResult.worldTransform)
+                self.pendingAnchorEntityLookup[arKitAnchor] = (anchorEntity, string)
+                arView.session.add(anchor: arKitAnchor)
+                #endif
             case .none:
                 print("no-op")
             }
         }.store(in: &disposables)
     }
 
+
+    func saveTheWorld() {
+        arView?.session.getCurrentWorldMap { (map, getWorldMapError) in
+
+            if let error = getWorldMapError {
+                print("🔴 Error fetching the world map. \(error)")
+                return
+            }
+            guard let map = map else {
+                print("🔴 Couldn't fetch the world map, but no error.")
+                return
+            }
+
+            print(map.anchors)
+//            do {
+//                try self.processFetchedWorldMap(map: map, plantName: plantName, anchorEntity: anchorEntity)
+//            } catch {
+//                print("Unable to process the FetchedWorldMap \(error)")
+//            }
+
+        }
+    }
     func deleteSpace(at offsets: IndexSet) {
         try? offsets.map { spaces[$0].id }.forEach { uuid in
             try networkClient

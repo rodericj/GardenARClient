@@ -20,6 +20,12 @@ struct WithSelectedSpaceView: View {
                 }) {
                     VStack {
                         CTAButtonView(title: "Space: \(viewModel.selectedSpace?.title ?? "")")
+                        Button(action: {
+                            self.viewModel.saveTheWorld()
+                            print("save world")
+                        }) {
+                            Text("Save the world")
+                        }
                     }
                 }
                 Spacer()
