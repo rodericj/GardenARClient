@@ -41,6 +41,26 @@ extension ViewModel {
            }
        }
 }
+
+
+class PlantSignCollisionEntity: Entity, HasCollision {
+    var cancellable: Cancellable?
+
+    init(plantSignEntity: Entity) {
+        super.init()
+        self.addChild(plantSignEntity)
+        self.components[CollisionComponent] = CollisionComponent(
+          shapes: [.generateBox(size: [1,0.2,1])],
+          mode: .trigger,
+          filter: .sensor
+        )
+    }
+
+    required init() {
+        fatalError("init() has not been implemented")
+    }
+}
+
 class ViewModel: ObservableObject, Identifiable {
     private let networkClient: NetworkFetching
     private var disposables = Set<AnyCancellable>()
@@ -88,8 +108,12 @@ class ViewModel: ObservableObject, Identifiable {
 
                 let anchorEntity = AnchorEntity(world: raycastResult.worldTransform)
                 anchorEntity.name = self.signAnchorNameIdentifier
-                anchorEntity.addChild(clonedPlantSign)
+                let collisionEntity = PlantSignCollisionEntity(plantSignEntity: clonedPlantSign)
+                collisionEntity.addChild(clonedPlantSign)
+                anchorEntity.addChild(collisionEntity)
 
+                collisionEntity.generateCollisionShapes(recursive: true)
+                
                 // 5. add an occlusion plane to the anchor for when the sign is down below
 //                anchorEntity.addOcclusionBox()
 

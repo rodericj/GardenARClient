@@ -81,7 +81,7 @@ final class ARViewContainer: UIViewRepresentable {
         arView.session.delegate = sceneDelegate
         sceneDelegate.tapGestureSetup()
         #endif
-        arView.addCoaching()
+//        arView.addCoaching()
         return arView
     }
 

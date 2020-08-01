@@ -201,7 +201,7 @@
                         1
                       ],
                       "identifier" : "6331BC7D-C729-48E2-B4D7-027955713FF3",
-                      "isEnabled" : false,
+                      "isEnabled" : true,
                       "isLooping" : false,
                       "isModal" : false,
                       "name" : "More Info Slide Up When close",
@@ -211,15 +211,13 @@
                             {
                               "configurationBox" : {
                                 "configuration" : {
-                                  "distance" : 1,
                                   "target" : [
                                     "74E9DC9A-0120-43E3-A04D-0F3796D42481"
-                                  ],
-                                  "type" : 0
+                                  ]
                                 },
-                                "name" : "proximity"
+                                "name" : "tapTarget"
                               },
-                              "identifier" : "623A74F5-28DE-4CC9-B4C7-C0A78080A7BF",
+                              "identifier" : "74A8CC87-205C-4242-87B4-E01CA702678B",
                               "isEnabled" : true
                             }
                           ],
@@ -787,23 +785,26 @@
                                     {
                                       "configurationBox" : {
                                         "configuration" : {
+                                          "animationStyle" : "basic",
+                                          "duration" : 1,
+                                          "emphasisAnimationType" : "pop",
+                                          "iterations" : 1,
                                           "target" : [
                                             "DFCC3F74-7D2B-4208-8AFA-99379D03EE89"
-                                          ],
-                                          "userIdentifier" : "Proximity50cm"
+                                          ]
                                         },
                                         "name" : {
-                                          "type" : "custom"
+                                          "type" : "emphasis"
                                         }
                                       },
-                                      "identifier" : "3CD65147-F557-490E-B05E-2858D432B36F",
+                                      "identifier" : "9E001485-EE74-4211-9762-979236E2171E",
                                       "isEnabled" : true
                                     }
                                   ],
                                   "__version" : 1
                                 }
                               ],
-                              "identifier" : "D277AC7B-E65B-464C-A31A-99AAB9131C1F",
+                              "identifier" : "9FC1CEA0-F246-4184-BFE2-1C295FC3B3A9",
                               "isEnabled" : true
                             }
                           ],
@@ -816,7 +817,7 @@
                         0.69019609689712524,
                         1
                       ],
-                      "identifier" : "9C7ADDCC-F4C3-4514-BDA5-8F65FA225051",
+                      "identifier" : "7F5943FD-BF09-4EF8-BC9D-8385AA5D650F",
                       "isEnabled" : true,
                       "isLooping" : false,
                       "isModal" : false,
@@ -827,15 +828,92 @@
                             {
                               "configurationBox" : {
                                 "configuration" : {
-                                  "distance" : 0.5,
                                   "target" : [
                                     "DFCC3F74-7D2B-4208-8AFA-99379D03EE89"
-                                  ],
-                                  "type" : 0
+                                  ]
                                 },
-                                "name" : "proximity"
+                                "name" : "tapTarget"
                               },
-                              "identifier" : "AFE83283-8F34-4CF2-8509-1C8BCF570AE7",
+                              "identifier" : "305F768B-C0A4-4246-A238-291E1A3D043E",
+                              "isEnabled" : true
+                            }
+                          ],
+                          "__version" : 1
+                        }
+                      ]
+                    }
+                  ],
+                  "__version" : 3
+                },
+                {
+                  "__content" : [
+                    {
+                      "accessibility" : {
+                        "__content" : [
+                          {
+                            "isEnabled" : false
+                          }
+                        ],
+                        "__version" : 1
+                      },
+                      "actionGroups" : [
+                        {
+                          "__content" : [
+                            {
+                              "configurations" : [
+                                {
+                                  "__content" : [
+                                    {
+                                      "configurationBox" : {
+                                        "configuration" : {
+                                          "animationStyle" : "basic",
+                                          "duration" : 1,
+                                          "emphasisAnimationType" : "jiggle",
+                                          "iterations" : 1,
+                                          "target" : [
+                                            "DFCC3F74-7D2B-4208-8AFA-99379D03EE89"
+                                          ]
+                                        },
+                                        "name" : {
+                                          "type" : "emphasis"
+                                        }
+                                      },
+                                      "identifier" : "50516590-2B3F-4A4D-8387-893FF35DFB10",
+                                      "isEnabled" : true
+                                    }
+                                  ],
+                                  "__version" : 1
+                                }
+                              ],
+                              "identifier" : "DC6A59D0-47CE-48E4-B21F-D0BA1D879C85",
+                              "isEnabled" : true
+                            }
+                          ],
+                          "__version" : 1
+                        }
+                      ],
+                      "color" : [
+                        0.49803921580314636,
+                        0.50196081399917603,
+                        0.52549022436141968,
+                        1
+                      ],
+                      "identifier" : "4EB937E4-7480-4FA1-8AF5-0C94391E0FF5",
+                      "isEnabled" : true,
+                      "isLooping" : false,
+                      "isModal" : false,
+                      "name" : "Parsed Tap",
+                      "triggers" : [
+                        {
+                          "__content" : [
+                            {
+                              "configurationBox" : {
+                                "configuration" : {
+                                  "userIdentifier" : "ParsedTap"
+                                },
+                                "name" : "custom"
+                              },
+                              "identifier" : "55BCF689-43C3-4B6B-BD2D-293A22273629",
                               "isEnabled" : true
                             }
                           ],
@@ -1734,21 +1812,21 @@
               "title" : "SignScene",
               "viewTransform" : {
                 "cameraTransform" : [
-                  -0.48662674427032471,
-                  -1.4901158529312397e-08,
-                  0.87360984086990356,
+                  0.90662610530853271,
+                  -1.3038516932795119e-08,
+                  0.42193484306335449,
                   0,
-                  0.12786868214607239,
-                  0.98923015594482422,
-                  0.071226641535758972,
+                  0.057282224297523499,
+                  0.99074161052703857,
+                  -0.1230844184756279,
                   0,
-                  -0.86420130729675293,
-                  0.14636830985546112,
-                  -0.48138576745986938,
+                  -0.41802820563316345,
+                  0.13576105237007141,
+                  0.89823228120803833,
                   0,
-                  -0.55290567874908447,
-                  0.13328546285629272,
-                  -0.32880741357803345,
+                  -0.28325867652893066,
+                  0.16521883010864258,
+                  0.57309615612030029,
                   1
                 ],
                 "sceneTransform" : [

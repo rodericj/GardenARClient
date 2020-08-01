@@ -240,15 +240,18 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
 }
 
 
+extension Entity {
+    func findRoot() -> Entity {
+        guard let parent = parent else {
+            return self
+        }
+        return parent.findRoot()
+    }
+}
 // Tap things
 extension ARDelegate {
     func tapGestureSetup() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tappedOnARView))
-
-        viewModel.$isAddingSign.sink { isAdding in
-            tapGesture.isEnabled = isAdding
-        }.store(in: &disposables)
-
         assert(viewModel.arView != nil)
         viewModel.arView?.addGestureRecognizer(tapGesture)
     }
@@ -257,7 +260,6 @@ extension ARDelegate {
     /// - Tag: TapHandler
     @objc
     func tappedOnARView(_ sender: UITapGestureRecognizer) {
-        // Create a new sticky note at the tap location.
         addNewAnchor(sender)
     }
 
@@ -267,6 +269,37 @@ extension ARDelegate {
             return
         }
         let touchLocation = sender.location(in: arView)
+
+
+        if !viewModel.isAddingSign {
+            let hits = arView.hitTest(touchLocation)
+            guard let scene = viewModel.loadedPlantSignScene else {
+                print("we must not have a scene yet")
+                return
+            }
+
+            guard let originalSignEntity = scene.plantSignEntityToAttach else {
+                print("This is the origina entity. use this as the key for the overrides")
+                return
+            }
+            hits.map {
+                $0.entity.findRoot()
+            }
+            .map { entity -> Entity? in
+                let found = entity.findEntity(named: "PlantSignEntityToAttach")
+                return found
+            }
+            .compactMap { optinalEntity in
+                return optinalEntity
+            }
+            .forEach { entity in
+                let overrides = [originalSignEntity.name: entity]
+                let notifications = scene.notifications
+                notifications.parsedTap.post(overrides: overrides)
+            }
+            return
+        }
+
 
         // Cast a ray to check for its intersection with any planes.
         #if !targetEnvironment(simulator)
@@ -279,9 +312,6 @@ extension ARDelegate {
         }
 
         print("the raycast results \(raycastResultsArray)")
-
-//        https://github.com/maxxfrazer/FocusEntity.git
-
 
         // TODO if we didn't collide with one of our own, then move forward, otherwise bail.
         // TODO at this point i think we can capture the tap, show the alert, send it to the server, then add it to the arview
