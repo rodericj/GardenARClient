@@ -50,7 +50,7 @@ class PlantSignCollisionEntity: Entity, HasCollision {
         super.init()
         self.addChild(plantSignEntity)
         self.components[CollisionComponent] = CollisionComponent(
-          shapes: [.generateBox(size: [1,0.2,1])],
+          shapes: [.generateBox(size: [1,1,1])],
           mode: .trigger,
           filter: .sensor
         )
@@ -67,6 +67,7 @@ class ViewModel: ObservableObject, Identifiable {
 
 
     var arView: ARView?
+    @Published var isShowingPlantInfo: Bool = false
     @Published var isAddingSign: Bool = false
     @Published var alertViewOutput: String = ""
     @Published var showingAlert: AlertType = .none

@@ -21,6 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let arDelegate = ARDelegate(viewModel: viewModel)
         arDelegate.setupListeners()
         viewModel.loadScene()
+        viewModel.getSpaces()
         let contentView = ContentView(sceneDelegate: arDelegate).environmentObject(viewModel)
         // Use a UIHostingController as window root view controller.
         let window = UIWindow(frame: UIScreen.main.bounds)

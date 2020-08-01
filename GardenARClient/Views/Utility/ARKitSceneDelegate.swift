@@ -296,6 +296,7 @@ extension ARDelegate {
                 let overrides = [originalSignEntity.name: entity]
                 let notifications = scene.notifications
                 notifications.parsedTap.post(overrides: overrides)
+                viewModel.isShowingPlantInfo = true
             }
             return
         }

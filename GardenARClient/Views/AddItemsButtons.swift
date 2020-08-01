@@ -76,14 +76,16 @@ struct AddItemsButtons: View {
                 }) {
                     CTAButtonView(title: "+ Space")
                 }
-                if viewModel.selectedSpace != nil {
+                if viewModel.selectedSpace != nil && !viewModel.isShowingPlantInfo {
                     Button(action: {
                         self.viewModel.isAddingSign = true
                     }) {
                         CTAButtonView(title: "+ Sign")
                     }
+
                 }
             }
+
         }.padding()
     }
 }
@@ -91,6 +93,8 @@ struct AddItemsButtons: View {
 struct AddSpaceButton_Previews: PreviewProvider {
     static var previews: some View {
         let viewModel = ViewModel(networkClient: NetworkClient())
+        let bananaSpace = SpaceInfo(title: "Banana", id: UUID())
+        viewModel.selectedSpace = bananaSpace
         return AddItemsButtons().environmentObject(viewModel)
     }
 }

@@ -13,9 +13,7 @@ struct WithSelectedSpaceView: View {
 
     var body: some View {
         ZStack {
-            if !viewModel.isAddingSign {
-                AddItemsButtons()
-            } else {
+            if viewModel.isAddingSign {
                 VStack {
                     Spacer()
                     HStack {
@@ -41,6 +39,8 @@ struct WithSelectedSpaceView: View {
                         }
                     }.padding()
                 }
+            } else {
+                AddItemsButtons()
             }
             VStack {
                 Button(action: {
@@ -74,12 +74,13 @@ struct WithSelectedSpaceView_Previews: PreviewProvider {
         viewModelWithOneSpaceIsAddingSign.spaces = [bananaSpace]
         viewModelWithOneSpaceIsAddingSign.isAddingSign = true
 
+
         let viewModelWithOneSpace = ViewModel(networkClient: NetworkClient())
-               viewModelWithOneSpace.selectedSpace = bananaSpace
-               viewModelWithOneSpace.spaces = [bananaSpace]
+        viewModelWithOneSpace.selectedSpace = bananaSpace
+        viewModelWithOneSpace.spaces = [bananaSpace]
 
         return Group {
-//            WithSelectedSpaceView().environmentObject(viewModelWithTwoSpaces)
+            WithSelectedSpaceView().environmentObject(viewModelWithTwoSpaces)
             WithSelectedSpaceView().environmentObject(viewModelWithOneSpace)
             WithSelectedSpaceView().environmentObject(viewModelWithOneSpaceIsAddingSign)
         }

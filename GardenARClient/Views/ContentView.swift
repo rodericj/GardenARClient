@@ -17,23 +17,26 @@ protocol HasOptionalARView {
     func updateWithEntity(entity: HasAnchoring)
 }
 
+
 struct ContentView : View {
 
     @EnvironmentObject var viewModel: ViewModel
    
     let sceneDelegate: ARSessionDelegate & HasOptionalARView
     var body: some View {
-        return ZStack {
+        ZStack {
             ARViewContainer(sceneDelegate: sceneDelegate, viewModel: viewModel)
                 .edgesIgnoringSafeArea(.all)
             if viewModel.selectedSpace == nil {
                 NoSelectedSpaceView()
             } else {
-               WithSelectedSpaceView()
+                WithSelectedSpaceView()
             }
             containedView()
         }
-        .onAppear(perform: viewModel.getSpaces)
+        .popover(isPresented: $viewModel.isShowingPlantInfo, attachmentAnchor: .point(.bottomTrailing), arrowEdge: .bottom) {
+            PlantInfo()
+        }
     }
 
     func containedView() -> AnyView? {
@@ -146,6 +149,7 @@ struct ContentView_Previews : PreviewProvider {
             ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelShowingListNoAlert)
             ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelShowingListAndAlert)
             ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelShowingListAndAlert).environment(\.colorScheme, .dark)
+
         }
     }
 }
