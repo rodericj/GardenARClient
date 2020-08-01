@@ -47,6 +47,7 @@ class ViewModel: ObservableObject, Identifiable {
 
 
     var arView: ARView?
+    @Published var isAddingSign: Bool = false
     @Published var alertViewOutput: String = ""
     @Published var showingAlert: AlertType = .none
     @Published var spaces: [SpaceInfo] = []
@@ -101,6 +102,10 @@ class ViewModel: ObservableObject, Identifiable {
                 self.pendingAnchorEntityLookup[arKitAnchor] = (anchorEntity, string)
                 arView.session.add(anchor: arKitAnchor)
                 #endif
+
+                // Set us back to the not isAddingSign state
+                self.isAddingSign = false
+
             case .none:
                 print("no-op")
             }
@@ -109,6 +114,8 @@ class ViewModel: ObservableObject, Identifiable {
 
 
     func saveTheWorld() {
+        #if !targetEnvironment(simulator)
+
         arView?.session.getCurrentWorldMap { (map, getWorldMapError) in
 
             if let error = getWorldMapError {
@@ -128,6 +135,7 @@ class ViewModel: ObservableObject, Identifiable {
 //            }
 
         }
+        #endif
     }
     func deleteSpace(at offsets: IndexSet) {
         try? offsets.map { spaces[$0].id }.forEach { uuid in

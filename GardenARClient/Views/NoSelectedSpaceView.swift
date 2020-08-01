@@ -14,7 +14,7 @@ struct NoSelectedSpaceView: View {
     var body: some View {
         VStack {
             if viewModel.spaces.isEmpty {
-                AddSpaceButton()
+                AddItemsButtons()
             } else {
                 SpacesListView()
             }

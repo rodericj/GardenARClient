@@ -19,7 +19,7 @@ struct SpacesListView: View {
                         SpaceRow(spaceInfo: space, selected: self.$viewModel.selectedSpace)
                     }.onDelete(perform: delete)
                 }.onAppear(perform: viewModel.getSpaces)
-                AddSpaceButton()
+                AddItemsButtons()
             }.navigationBarTitle(Text("Available Spaces"))
         }
     }

@@ -116,7 +116,7 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
                     let overrides = [originalSignEntity.name: entity]
                     //print("overrides \(overrides.keys)")
                     if theDistance > 2 {
-                        //                    print("send notification that we are more than 2 meters away. So like hide the extra stuff i guess")
+                        print("send notification that we are more than 2 meters away. So like hide the extra stuff i guess")
                         notifications.far.post(overrides: overrides)
                     }
                     if theDistance < 1 {
@@ -180,6 +180,7 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
                 let plantName = anchorEntityContainingSignEntityAndStringTuple.1
                 // 8. Need to get the world map then verify that this new thing is on there.
                 // 8a. At this point we actually need to wait until we get a signal that the anchors have changed. To the delegate!
+                #if !targetEnvironment(simulator)
                 viewModel.arView?.session.getCurrentWorldMap { (map, getWorldMapError) in
 
                     if let error = getWorldMapError {
@@ -199,6 +200,7 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
                     }
 
                 }
+                #endif
         }
 
         // Handle the new "named anchor" which gets added from an unnamed anchor above
@@ -242,6 +244,11 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
 extension ARDelegate {
     func tapGestureSetup() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tappedOnARView))
+
+        viewModel.$isAddingSign.sink { isAdding in
+            tapGesture.isEnabled = isAdding
+        }.store(in: &disposables)
+
         assert(viewModel.arView != nil)
         viewModel.arView?.addGestureRecognizer(tapGesture)
     }
