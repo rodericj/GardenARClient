@@ -65,7 +65,6 @@ class ViewModel: ObservableObject, Identifiable {
     private let networkClient: NetworkFetching
     private var disposables = Set<AnyCancellable>()
 
-
     var arView: ARView?
     @Published var isShowingPlantInfo: Bool = false
     @Published var isAddingSign: Bool = false
@@ -89,54 +88,21 @@ class ViewModel: ObservableObject, Identifiable {
     let signAnchorNameIdentifier = "This Is the anchor Entity you are looking for. We added the plantSignScene to this"
     var pendingAnchorEntityLookup: [ARAnchor : (AnchorEntity, String)] = [:]
     var pendingAnchorEntitySet =  Set<AnchorEntity>()
+
     init(networkClient: NetworkFetching) {
         self.networkClient = networkClient
-
 
         $alertViewOutput.sink { string in
             switch self.showingAlert {
             case .createSpace(_):
                 try? self.makeSpace(named: string)
             case .createMarker(_, let arView, let raycastResult):
-                #if !targetEnvironment(simulator)
-
-                // This is us adding the full scene to the
-                guard let clonedPlantSign = self.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
-                    print("no plant sign entity")
-                    return
-                }
-                guard let raycastResult = raycastResult else { return }
-
-                let anchorEntity = AnchorEntity(world: raycastResult.worldTransform)
-                anchorEntity.name = self.signAnchorNameIdentifier
-                let collisionEntity = PlantSignCollisionEntity(plantSignEntity: clonedPlantSign)
-                collisionEntity.addChild(clonedPlantSign)
-                anchorEntity.addChild(collisionEntity)
-
-                collisionEntity.generateCollisionShapes(recursive: true)
-                
-                // 5. add an occlusion plane to the anchor for when the sign is down below
-//                anchorEntity.addOcclusionBox()
-
-                // 6. Set the sign text
-                clonedPlantSign.updatePlantSignName(name: string)
-
-                print("// 7. add the anchor to the arView")
-                arView.scene.addAnchor(anchorEntity)
-                let arKitAnchor = ARAnchor(name: "RemoteUUID-\(UUID().uuidString)", transform: raycastResult.worldTransform)
-                self.pendingAnchorEntityLookup[arKitAnchor] = (anchorEntity, string)
-                arView.session.add(anchor: arKitAnchor)
-                #endif
-
-                // Set us back to the not isAddingSign state
-                self.isAddingSign = false
-
+                self.addSign(named: string, at: raycastResult, on: arView)
             case .none:
                 print("no-op")
             }
         }.store(in: &disposables)
     }
-
 
     func saveTheWorld() {
         #if !targetEnvironment(simulator)
@@ -258,3 +224,45 @@ class ViewModel: ObservableObject, Identifiable {
     }
 }
 
+extension ViewModel {
+    func addSign(named name: String, at raycastResult: ARRaycastResult?, on  arView: ARView) {
+        #if !targetEnvironment(simulator)
+
+        // This is us adding the full scene to the
+        guard let clonedPlantSign = self.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
+            print("no plant sign entity")
+            return
+        }
+        // TODO ensure that this top part gets added also
+        guard let extraTop = self.loadedPlantSignScene?.plantSignExtraTop?.clone(recursive: true) else {
+            print("no plant sign entity")
+            return
+        }
+        guard let raycastResult = raycastResult else { return }
+
+        let anchorEntity = AnchorEntity(world: raycastResult.worldTransform)
+        anchorEntity.name = self.signAnchorNameIdentifier
+        let collisionEntity = PlantSignCollisionEntity(plantSignEntity: clonedPlantSign)
+        collisionEntity.addChild(clonedPlantSign)
+        clonedPlantSign.addChild(extraTop)
+        anchorEntity.addChild(collisionEntity)
+
+        collisionEntity.generateCollisionShapes(recursive: true)
+
+        // 5. add an occlusion plane to the anchor for when the sign is down below
+        //                anchorEntity.addOcclusionBox()
+
+        // 6. Set the sign text
+        clonedPlantSign.updatePlantSignName(name: name)
+
+        print("// 7. add the anchor to the arView")
+        arView.scene.addAnchor(anchorEntity)
+        let arKitAnchor = ARAnchor(name: "RemoteUUID-\(UUID().uuidString)", transform: raycastResult.worldTransform)
+        self.pendingAnchorEntityLookup[arKitAnchor] = (anchorEntity, name)
+        arView.session.add(anchor: arKitAnchor)
+        #endif
+
+        // Set us back to the not isAddingSign state
+        self.isAddingSign = false
+    }
+}
