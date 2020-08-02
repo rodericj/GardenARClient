@@ -96,6 +96,7 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
                     return
                 }
 
+                // TODO get PlantSignExtraTop, PlantSignExtraMiddle, PlantSignExtraBottom
                 guard let originalSignEntity = scene.plantSignEntityToAttach else {
                     print("This is the origina entity. use this as the key for the overrides")
                     return
@@ -263,45 +264,7 @@ extension ARDelegate {
         addNewAnchor(sender)
     }
 
-    fileprivate func addNewAnchor(_ sender: UITapGestureRecognizer) {
-        // Get the user's tap screen location.
-        guard let arView = viewModel.arView else {
-            return
-        }
-        let touchLocation = sender.location(in: arView)
-
-
-        if !viewModel.isAddingSign {
-            let hits = arView.hitTest(touchLocation)
-            guard let scene = viewModel.loadedPlantSignScene else {
-                print("we must not have a scene yet")
-                return
-            }
-
-            guard let originalSignEntity = scene.plantSignEntityToAttach else {
-                print("This is the origina entity. use this as the key for the overrides")
-                return
-            }
-            hits.map {
-                $0.entity.findRoot()
-            }
-            .map { entity -> Entity? in
-                let found = entity.findEntity(named: "PlantSignEntityToAttach")
-                return found
-            }
-            .compactMap { optinalEntity in
-                return optinalEntity
-            }
-            .forEach { entity in
-                let overrides = [originalSignEntity.name: entity]
-                let notifications = scene.notifications
-                notifications.parsedTap.post(overrides: overrides)
-                viewModel.isShowingPlantInfo = true
-            }
-            return
-        }
-
-
+    private func addSign(at touchLocation: CGPoint, on arView: ARView) {
         // Cast a ray to check for its intersection with any planes.
         #if !targetEnvironment(simulator)
 
@@ -318,7 +281,51 @@ extension ARDelegate {
         // TODO at this point i think we can capture the tap, show the alert, send it to the server, then add it to the arview
         viewModel.showingAlert = .createMarker("Name this plant", arView, raycastResult)
         #endif
+    }
 
+    private func checkForCollisions(at touchLocation: CGPoint, on arView: ARView) {
+        let hits = arView.hitTest(touchLocation)
+        guard let scene = viewModel.loadedPlantSignScene else {
+            print("we must not have a scene yet")
+            return
+        }
+
+        guard let originalSignEntity = scene.plantSignEntityToAttach else {
+            print("This is the origina entity. use this as the key for the overrides")
+            return
+        }
+        hits.map {
+            $0.entity.findRoot()
+        }
+        .map { entity -> Entity? in
+            let found = entity.findEntity(named: "PlantSignEntityToAttach")
+            return found
+        }
+        .compactMap { optinalEntity in
+            return optinalEntity
+        }
+        .forEach { entity in
+            let overrides = [originalSignEntity.name: entity]
+            let notifications = scene.notifications
+            notifications.parsedTap.post(overrides: overrides)
+            viewModel.isShowingPlantInfo = true
+        }
+    }
+
+    fileprivate func addNewAnchor(_ sender: UITapGestureRecognizer) {
+        // Get the user's tap screen location.
+        guard let arView = viewModel.arView else {
+            return
+        }
+        let touchLocation = sender.location(in: arView)
+
+        // do nothing if we are in the adding sign state
+        guard !viewModel.isAddingSign else {
+            addSign(at: touchLocation, on: arView)
+            return
+        }
+
+       checkForCollisions(at: touchLocation, on: arView)
     }
 }
 // private funcs
