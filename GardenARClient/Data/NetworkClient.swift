@@ -67,6 +67,7 @@ protocol NetworkFetching {
 
 class NetworkClient: NetworkFetching {
 
+    private var disposables = Set<AnyCancellable>()
     let session: URLSession
 
     init() {

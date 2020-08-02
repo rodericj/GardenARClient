@@ -355,7 +355,7 @@
                         1
                       ],
                       "identifier" : "A2F005E8-157E-4612-A575-613F14C6DDAB",
-                      "isEnabled" : false,
+                      "isEnabled" : true,
                       "isLooping" : false,
                       "isModal" : false,
                       "name" : "Second Info Slide Up",
@@ -365,15 +365,11 @@
                             {
                               "configurationBox" : {
                                 "configuration" : {
-                                  "distance" : 1,
-                                  "target" : [
-                                    "785DB05B-EDAC-48BC-AAD3-ACF1E12904AC"
-                                  ],
-                                  "type" : 0
+                                  "userIdentifier" : "parsedTap"
                                 },
-                                "name" : "proximity"
+                                "name" : "custom"
                               },
-                              "identifier" : "28BACD4C-4368-4188-91D7-084B223B524C",
+                              "identifier" : "304675F3-5307-470A-BDCE-297D6EF6578D",
                               "isEnabled" : true
                             }
                           ],
@@ -480,7 +476,7 @@
                         1
                       ],
                       "identifier" : "4F78EFA8-2ECA-402A-9F59-7D07712F967C",
-                      "isEnabled" : false,
+                      "isEnabled" : true,
                       "isLooping" : false,
                       "isModal" : false,
                       "name" : "Third Info Slide Up",
@@ -490,15 +486,13 @@
                             {
                               "configurationBox" : {
                                 "configuration" : {
-                                  "distance" : 1,
                                   "target" : [
                                     "785DB05B-EDAC-48BC-AAD3-ACF1E12904AC"
-                                  ],
-                                  "type" : 0
+                                  ]
                                 },
-                                "name" : "proximity"
+                                "name" : "tapTarget"
                               },
-                              "identifier" : "A41AF27C-40A4-48B6-93F1-A78FC11690E2",
+                              "identifier" : "F8855B3F-DADD-4CF8-A603-F4AC6C2A59CF",
                               "isEnabled" : true
                             }
                           ],

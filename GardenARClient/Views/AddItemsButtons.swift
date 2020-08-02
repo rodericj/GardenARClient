@@ -66,19 +66,19 @@ extension UIView {
 }
 
 struct AddItemsButtons: View {
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var store: Store<ViewModel>
     var body: some View {
         VStack {
             Spacer()
             HStack {
                 Button(action: {
-                    self.viewModel.showingAlert = .createSpace("Add a new Space")
+                    self.store.value.showingAlert = .createSpace("Add a new Space")
                 }) {
                     CTAButtonView(title: "+ Space")
                 }
-                if viewModel.selectedSpace != nil && !viewModel.isShowingPlantInfo {
+                if store.value.selectedSpace != nil && !store.value.isShowingPlantInfo {
                     Button(action: {
-                        self.viewModel.isAddingSign = true
+                        self.store.value.isAddingSign = true
                     }) {
                         CTAButtonView(title: "+ Sign")
                     }
@@ -92,9 +92,10 @@ struct AddItemsButtons: View {
 
 struct AddSpaceButton_Previews: PreviewProvider {
     static var previews: some View {
-        let viewModel = ViewModel(networkClient: NetworkClient())
+        var viewModel = ViewModel()
         let bananaSpace = SpaceInfo(title: "Banana", id: UUID())
+        let store = Store<ViewModel>(initialValue: viewModel)
         viewModel.selectedSpace = bananaSpace
-        return AddItemsButtons().environmentObject(viewModel)
+        return AddItemsButtons().environmentObject(store)
     }
 }

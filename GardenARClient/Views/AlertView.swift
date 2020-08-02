@@ -32,9 +32,11 @@ enum AlertType {
 
 struct AlertView: View {
     @State var enteredText: String = ""
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var store: Store<ViewModel>
     @State private var keyboardHeight: CGFloat = 0
+
     let alertType: AlertType
+    let completion: (String) -> ()
     var body: some View {
         return VStack {
             Spacer()
@@ -54,7 +56,7 @@ struct AlertView: View {
                     .padding(10)
                 HStack {
                     Button(action: {
-                        self.viewModel.showingAlert = .none
+                        self.store.value.showingAlert = .none
                     }) {
                         Text("Cancel")
                             .padding()
@@ -64,8 +66,8 @@ struct AlertView: View {
                             .cornerRadius(5)
                     }.padding(10)
                     Button(action: {
-                        self.viewModel.alertViewOutput = self.enteredText
-                        self.viewModel.showingAlert = .none
+                        self.completion(self.enteredText)
+                        self.store.value.showingAlert = .none
                     }) {
                         Text("Ok")
                             .padding()
@@ -83,17 +85,21 @@ struct AlertView: View {
             .padding(.bottom, keyboardHeight)
                        .onReceive(Publishers.keyboardHeight) { self.keyboardHeight = $0 }
             Spacer()
-
-
         }
     }
 }
 
+extension AlertView {
+    func postSpace() {
+
+    }
+    
+}
 struct AlertView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            AlertView(alertType: .createMarker("Enter new Space Name", ARView(), nil)).environment(\.colorScheme, .light)
-            AlertView(alertType: .createMarker("Enter new Space Name", ARView(),  nil)).environment(\.colorScheme, .dark)
+            AlertView(alertType: .createMarker("Enter new Space Name", ARView(), nil), completion: { _ in }).environment(\.colorScheme, .light)
+            AlertView(alertType: .createMarker("Enter new Space Name", ARView(),  nil), completion: { _ in }).environment(\.colorScheme, .dark)
         }
     }
 }

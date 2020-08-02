@@ -9,14 +9,14 @@
 import SwiftUI
 
 struct NoSelectedSpaceView: View {
-    @EnvironmentObject var viewModel: ViewModel
-
+    @EnvironmentObject var store: Store<ViewModel>
+    let networkClient: NetworkClient
     var body: some View {
         VStack {
-            if viewModel.spaces.isEmpty {
+            if store.value.spaces.isEmpty {
                 AddItemsButtons()
             } else {
-                SpacesListView()
+                SpacesListView(networkClient: networkClient)
             }
         }
     }
@@ -26,8 +26,9 @@ struct NoSelectedSpaceView_Previews: PreviewProvider {
     static var previews: some View {
         let bananaSpace = SpaceInfo(title: "Banana", id: UUID())
         let appleSpace = SpaceInfo(title: "Apple", id: UUID())
-        let viewModelWithTwoSpaces = ViewModel(networkClient: NetworkClient())
+        var viewModelWithTwoSpaces = ViewModel()
         viewModelWithTwoSpaces.spaces = [appleSpace, bananaSpace]
-        return NoSelectedSpaceView().environmentObject(viewModelWithTwoSpaces)
+        let store = Store<ViewModel>(initialValue: viewModelWithTwoSpaces)
+        return NoSelectedSpaceView(networkClient: NetworkClient()).environmentObject(store)
     }
 }

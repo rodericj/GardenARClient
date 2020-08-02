@@ -9,11 +9,11 @@
 import SwiftUI
 
 struct WithSelectedSpaceView: View {
-    @EnvironmentObject var viewModel: ViewModel
+    @EnvironmentObject var store: Store<ViewModel>
 
     var body: some View {
         ZStack {
-            if viewModel.isAddingSign {
+            if store.value.isAddingSign {
                 VStack {
                     Spacer()
                     HStack {
@@ -27,7 +27,7 @@ struct WithSelectedSpaceView: View {
                             .cornerRadius(40)
                             .shadow(radius: 10)
                         Button(action: {
-                            self.viewModel.isAddingSign = false
+                            self.store.value.isAddingSign = false
                         }) {
                             Text("Cancel")
                                 .font(.body)
@@ -44,12 +44,12 @@ struct WithSelectedSpaceView: View {
             }
             VStack {
                 Button(action: {
-                    self.viewModel.selectedSpace = nil
+                    self.store.value.selectedSpace = nil
                 }) {
-                    CTAButtonView(title: "Space: \(viewModel.selectedSpace?.title ?? "")")
+                    CTAButtonView(title: "Space: \(store.value.selectedSpace?.title ?? "")")
                 }
                 Button(action: {
-                    self.viewModel.saveTheWorld()
+                    self.store.value.saveTheWorld()
                     print("save world")
                 }) {
                     Text("Save the world")
@@ -65,24 +65,27 @@ struct WithSelectedSpaceView_Previews: PreviewProvider {
     static var previews: some View {
         let bananaSpace = SpaceInfo(title: "Banana", id: UUID())
         let appleSpace = SpaceInfo(title: "Apple", id: UUID())
-        let viewModelWithTwoSpaces = ViewModel(networkClient: NetworkClient())
+        var viewModelWithTwoSpaces = ViewModel()
         viewModelWithTwoSpaces.selectedSpace = appleSpace
         viewModelWithTwoSpaces.spaces = [appleSpace, bananaSpace]
+        let storeWithTwoSpaces = Store<ViewModel>(initialValue: viewModelWithTwoSpaces)
 
-        let viewModelWithOneSpaceIsAddingSign = ViewModel(networkClient: NetworkClient())
+        var viewModelWithOneSpaceIsAddingSign = ViewModel()
         viewModelWithOneSpaceIsAddingSign.selectedSpace = bananaSpace
         viewModelWithOneSpaceIsAddingSign.spaces = [bananaSpace]
         viewModelWithOneSpaceIsAddingSign.isAddingSign = true
+        let storeWithOneSpaceIsAdding = Store<ViewModel>(initialValue: viewModelWithOneSpaceIsAddingSign)
 
-
-        let viewModelWithOneSpace = ViewModel(networkClient: NetworkClient())
+        var viewModelWithOneSpace = ViewModel()
         viewModelWithOneSpace.selectedSpace = bananaSpace
         viewModelWithOneSpace.spaces = [bananaSpace]
+        let storeWithOneSpace = Store<ViewModel>(initialValue: viewModelWithOneSpace)
 
         return Group {
-            WithSelectedSpaceView().environmentObject(viewModelWithTwoSpaces)
-            WithSelectedSpaceView().environmentObject(viewModelWithOneSpace)
-            WithSelectedSpaceView().environmentObject(viewModelWithOneSpaceIsAddingSign)
+            WithSelectedSpaceView().environmentObject(storeWithTwoSpaces)
+            WithSelectedSpaceView().environmentObject(storeWithOneSpaceIsAdding)
+            WithSelectedSpaceView().environmentObject(storeWithOneSpace)
+
         }
     }
 }

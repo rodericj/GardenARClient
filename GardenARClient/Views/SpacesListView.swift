@@ -7,33 +7,69 @@
 //
 
 import SwiftUI
+import Combine
 
 struct SpacesListView: View {
-    @EnvironmentObject var viewModel: ViewModel
-    
+    @EnvironmentObject var store: Store<ViewModel>
+    let networkClient: NetworkClient
     var body: some View {
         NavigationView {
             ZStack {
                 List {
-                    ForEach(viewModel.spaces) { space in
-                        SpaceRow(spaceInfo: space, selected: self.$viewModel.selectedSpace)
+                    ForEach(store.value.spaces) { space in
+                        SpaceRow(spaceInfo: space, selected: self.$store.value.selectedSpace, networkClient: self.networkClient)
                     }.onDelete(perform: delete)
-                }.onAppear(perform: viewModel.getSpaces)
+                }.onAppear(perform: getSpaces)
                 AddItemsButtons()
             }.navigationBarTitle(Text("Available Spaces"))
         }
     }
 
     func delete(at offsets: IndexSet) {
-        viewModel.deleteSpace(at: offsets)
+        deleteSpace(at: offsets)
+    }
+}
+
+extension SpacesListView {
+    func deleteSpace(at offsets: IndexSet) {
+        try? offsets.map { store.value.spaces[$0].id }.forEach { uuid in
+            var cancellable: AnyCancellable?
+            cancellable = try networkClient
+                .deleteSpace(uuid: uuid )
+                .sink(receiveCompletion: { error in
+                    print("error deleting \(error)")
+                }, receiveValue: { succeeded in
+                    self.getSpaces()
+                    cancellable?.cancel()
+                })
+        }
+    }
+    func getSpaces() {
+        var cancellable: AnyCancellable?
+        cancellable = networkClient.getSpaces
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { value in
+                    switch value {
+                    case .failure:
+                        self.store.value.spaces = []
+                    case .finished:
+                        break
+                    }
+                },
+                receiveValue: { spaces in
+                    self.store.value.spaces = spaces
+                    cancellable?.cancel()
+            })
     }
 }
 
 struct SpacesListView_Previews: PreviewProvider {
     static var previews: some View {
-        let viewModel = ViewModel(networkClient: NetworkClient())
+        var viewModel = ViewModel()
         viewModel.spaces = [SpaceInfo(title: "banana", id: UUID()),
                             SpaceInfo(title: "some other space", id: UUID())]
-        return SpacesListView().environmentObject(viewModel)
+        let store = Store<ViewModel>(initialValue: viewModel)
+        return SpacesListView(networkClient: NetworkClient()).environmentObject(store)
     }
 }

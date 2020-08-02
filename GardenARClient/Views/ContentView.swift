@@ -20,27 +20,27 @@ protocol HasOptionalARView {
 
 struct ContentView : View {
 
-    @EnvironmentObject var viewModel: ViewModel
-   
+    @EnvironmentObject var store: Store<ViewModel>
     let sceneDelegate: ARSessionDelegate & HasOptionalARView
+    let networkClient: NetworkClient
     var body: some View {
         ZStack {
-            ARViewContainer(sceneDelegate: sceneDelegate, viewModel: viewModel)
+            ARViewContainer(sceneDelegate: sceneDelegate, store: store)
                 .edgesIgnoringSafeArea(.all)
-            if viewModel.selectedSpace == nil {
-                NoSelectedSpaceView()
+            if store.value.selectedSpace == nil {
+                NoSelectedSpaceView(networkClient: networkClient)
             } else {
                 WithSelectedSpaceView()
             }
             containedView()
         }
-        .popover(isPresented: $viewModel.isShowingPlantInfo, attachmentAnchor: .point(.bottomTrailing), arrowEdge: .bottom) {
+        .popover(isPresented: $store.value.isShowingPlantInfo, attachmentAnchor: .point(.bottomTrailing), arrowEdge: .bottom) {
             PlantInfo()
         }
     }
 
     func containedView() -> AnyView? {
-        switch viewModel.showingAlert {
+        switch store.value.showingAlert {
 
         case .none:
             return nil
@@ -50,36 +50,122 @@ struct ContentView : View {
                     Rectangle()
                         .fill(Color.black.opacity(0.4))
                         .edgesIgnoringSafeArea(.all)
-                    AlertView(alertType: viewModel.showingAlert)
+                    AlertView(alertType: store.value.showingAlert, completion: { spaceName in
+                        print("the new space name \(spaceName)")
+                        try? self.makeSpace(named: spaceName)
+                    })
                 }
             )
-        case .createMarker(_, _, _):
+        case .createMarker(_, let arView, let raycastResult):
             return AnyView(
                 ZStack {
                     Rectangle()
                         .fill(Color.black.opacity(0.4))
                         .edgesIgnoringSafeArea(.all)
-                    AlertView(alertType: viewModel.showingAlert)
+                    AlertView(alertType: store.value.showingAlert, completion: { plantName in
+                        print("the new plantName name \(plantName)")
+                        self.addSign(named: plantName, at: raycastResult, on: arView)
+                    })
                 }
             )
         }
     }
 }
 
+extension ContentView {
+    func makeSpace(named name: String) throws {
+        var cancellable: AnyCancellable?
+        cancellable = try networkClient.makeSpace(named: name)
+            .sink(receiveCompletion: { result in
+                switch result {
+                case .finished:
+                    print("finished making space")
+                case .failure(let errorWithLocalizedDescription):
+                    print("🔴 Error in fetching \(errorWithLocalizedDescription.localizedDescription)")
+                }
+            }, receiveValue: { newSpaceInfo in
+                print("the new space was created")
+                self.store.value.spaces.append(newSpaceInfo)
+                self.store.value.selectedSpace = newSpaceInfo
+                cancellable?.cancel()
+            })
+    }
+
+    func addSign(named name: String, at raycastResult: ARRaycastResult?, on  arView: ARView) {
+        #if !targetEnvironment(simulator)
+
+        // This is us adding the full scene to the
+        guard let clonedPlantSign = self.store.value.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
+            print("no plant sign entity")
+            return
+        }
+        // TODO ensure that this top part gets added also
+//        guard let extraTop = self.store.value.loadedPlantSignScene?.plantSignExtraTop?.clone(recursive: true) else {
+//            print("no plant sign entity")
+//            return
+//        }
+        guard let raycastResult = raycastResult else { return }
+
+        let anchorEntity = AnchorEntity(world: raycastResult.worldTransform)
+        anchorEntity.name = Scene.AnchorCollection.signAnchorNameIdentifier
+        let collisionEntity = PlantSignCollisionEntity(plantSignEntity: clonedPlantSign)
+        collisionEntity.addChild(clonedPlantSign)
+//        clonedPlantSign.addChild(extraTop)
+        anchorEntity.addChild(collisionEntity)
+
+        collisionEntity.generateCollisionShapes(recursive: true)
+
+        // 5. add an occlusion plane to the anchor for when the sign is down below
+        //                anchorEntity.addOcclusionBox()
+
+        // 6. Set the sign text
+        clonedPlantSign.updatePlantSignName(name: name)
+
+        print("// 7. add the anchor to the arView")
+        arView.scene.addAnchor(anchorEntity)
+        let arKitAnchor = ARAnchor(name: "RemoteUUID-\(UUID().uuidString)", transform: raycastResult.worldTransform)
+        store.value.pendingAnchorEntityLookup[arKitAnchor] = (anchorEntity, name)
+        arView.session.add(anchor: arKitAnchor)
+        #endif
+
+        // Set us back to the not isAddingSign state
+        store.value.isAddingSign = false
+    }
+
+    func addAnchor(anchorName: String, anchorID: UUID, worldData: Data) throws {
+        guard let currentSelectedSpace = store.value.selectedSpace else {
+            throw ViewModelError.noSpaceSelected
+        }
+        print("ViewModel:AddAnchor We have a space selected, so send the anchor \(anchorID) \(anchorName) to the network client")
+        var cancellable: AnyCancellable?
+        cancellable = try networkClient.update(space: currentSelectedSpace,
+                                               anchorID: anchorID,
+                                               anchorName: anchorName,
+                                               worldMapData: worldData).sink(receiveCompletion: { error in
+
+                                               }, receiveValue: { anchor in
+                                                print("ViewModel:AddAnchor just saved this anchor \(anchor) with id: \(anchor.id?.uuidString ?? "No ID set for this anchor")")
+                                                self.store.value.selectedSpace?.anchors?.append(anchor)
+                                                cancellable?.cancel()
+                                               })
+    }
+
+
+}
 final class ARViewContainer: UIViewRepresentable {
-    let viewModel: ViewModel
+    let store: Store<ViewModel>
     let sceneDelegate: ARSessionDelegate & HasOptionalARView
     var sceneObserver: Cancellable!
     var anchorStateChangeObserver: Cancellable!
 
-    init(sceneDelegate: ARSessionDelegate & HasOptionalARView, viewModel: ViewModel) {
+    init(sceneDelegate: ARSessionDelegate & HasOptionalARView, store: Store<ViewModel>) {
         self.sceneDelegate = sceneDelegate
-        self.viewModel = viewModel
+        self.store = store
     }
 
     func makeUIView(context: Context) -> ARView {
         let arView = ARView(frame: .zero)
-        viewModel.arView = arView
+        store.value.arView = arView
         #if !targetEnvironment(simulator)
         arView.session.delegate = sceneDelegate
         sceneDelegate.tapGestureSetup()
@@ -120,35 +206,38 @@ class TestARSession: NSObject, ARSessionDelegate, HasOptionalARView {
 
     func tapGestureSetup() {
     }
-
-    var arView: ARView?
 }
 struct ContentView_Previews : PreviewProvider {
 
     static var previews: some View {
-        let viewModelWithSelected = ViewModel(networkClient: NetworkClient())
+        var viewModelWithSelected = ViewModel()
         viewModelWithSelected.selectedSpace = SpaceInfo(title: "Banana", id: UUID())
+        let storeSelected = Store<ViewModel>(initialValue: viewModelWithSelected)
 
-        let viewModelWithOutSelected = ViewModel(networkClient: NetworkClient())
+        let viewModelWithoutSelected = ViewModel()
+        let storeWithoutSelected = Store<ViewModel>(initialValue: viewModelWithoutSelected)
 
-        let viewModelShowingAlert = ViewModel(networkClient: NetworkClient())
+        var viewModelShowingAlert = ViewModel()
         viewModelShowingAlert.showingAlert = .createMarker("Hello there", ARView(), nil)
+        let storeShowingAlert = Store<ViewModel>(initialValue: viewModelShowingAlert)
 
-        let viewModelShowingListNoAlert = ViewModel(networkClient: NetworkClient())
+        var viewModelShowingListNoAlert = ViewModel()
         viewModelShowingListNoAlert.selectedSpace = nil
+        let storeShowingListNoAlert = Store<ViewModel>(initialValue: viewModelShowingListNoAlert)
 
-        let viewModelShowingListAndAlert = ViewModel(networkClient: NetworkClient())
+        var viewModelShowingListAndAlert = ViewModel()
         viewModelShowingListAndAlert.selectedSpace = nil
         viewModelShowingListAndAlert.spaces = [SpaceInfo(title: "Banana", id: UUID())]
         viewModelShowingListAndAlert.showingAlert = .createMarker("Hello there", ARView(), nil)
+        let storeShowingListAndAlert = Store<ViewModel>(initialValue: viewModelShowingListAndAlert)
 
         return Group {
-            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelWithOutSelected)
-            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelWithSelected)
-            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelShowingAlert)
-            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelShowingListNoAlert)
-            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelShowingListAndAlert)
-            ContentView(sceneDelegate: TestARSession()).environmentObject(viewModelShowingListAndAlert).environment(\.colorScheme, .dark)
+            ContentView(sceneDelegate: TestARSession(), networkClient: NetworkClient()).environmentObject(storeSelected)
+            ContentView(sceneDelegate: TestARSession(), networkClient: NetworkClient()).environmentObject(storeWithoutSelected)
+            ContentView(sceneDelegate: TestARSession(), networkClient: NetworkClient()).environmentObject(storeShowingAlert)
+            ContentView(sceneDelegate: TestARSession(), networkClient: NetworkClient()).environmentObject(storeShowingListNoAlert)
+            ContentView(sceneDelegate: TestARSession(), networkClient: NetworkClient()).environmentObject(storeShowingListAndAlert)
+            ContentView(sceneDelegate: TestARSession(), networkClient: NetworkClient()).environmentObject(storeShowingListAndAlert).environment(\.colorScheme, .dark)
 
         }
     }

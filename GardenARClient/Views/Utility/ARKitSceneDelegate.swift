@@ -16,82 +16,35 @@ enum AnchorError: Error {
     case noUniqueIdentifier(String)
 }
 
+extension Scene.AnchorCollection {
+    static let signAnchorNameIdentifier = "This Is the anchor Entity you are looking for. We added the plantSignScene to this"
+}
+
 class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDelegate {
     func updateWithEntity(entity: HasAnchoring) {
-        viewModel.arView?.scene.addAnchor(entity)
+        store.value.arView?.scene.addAnchor(entity)
     }
 
     var visibleSigns = Set<Entity>()
     var hiddenSigns = Set<Entity>()
     static let unnamedAnchorName = "NewUnnamedAnchor"
-    let viewModel: ViewModel
+    let store: Store<ViewModel>
     private var disposables = Set<AnyCancellable>()
 
-    init(viewModel: ViewModel) {
-        self.viewModel = viewModel
+    let networkClient: NetworkClient
+    init(store: Store<ViewModel>, networkClient: NetworkClient) {
+        self.store = store
+        self.networkClient = networkClient
     }
-
-
-    func setupListeners() {
-
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
-            self.shouldUpdateSigns = true
-        }
-
-        viewModel.$anchors.sink { anchors in
-            print("new anchors from the viewModel.$anchor's stream")
-            anchors.forEach { anchor in
-                print("anchor: \(anchor.id?.uuidString ?? "anchor with no id seems unlikely") \(anchor.title)")
-            }
-        }.store(in: &disposables)
-        viewModel.$selectedSpace.sink { spaceInfo in
-            print("🌎 In the ARDelegate the view model has changed")
-            guard let data = spaceInfo?.data else {
-                print("🌎 This is likely a new space with no data saved on the server. Probably fine. But we _may_ be fetching the space data now")
-                return
-            }
-            guard let worldMap = try? NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: data) else {
-                print("🌎 Error loading the world map from the data. Something is pretty wrong here")
-                return
-            }
-            let worldConfiguration = ARWorldTrackingConfiguration()
-            worldConfiguration.initialWorldMap = worldMap
-            guard let arView = self.viewModel.arView else {
-                print("🌎 There is no arView to set the world. This is a problem")
-                return
-            }
-            print("The scene itself before run is \(arView.scene.id)")
-            print("🌎 starting new session with world data from the network")
-            #if !targetEnvironment(simulator)
-
-            arView.session.run(worldConfiguration, options: [.resetTracking, .removeExistingAnchors])
-            #endif
-            print("The scene itself after run is \(arView.scene.id)")
-            guard let scene = self.viewModel.loadedPlantSignScene else {
-                print("weird, we haven't loaded the scene yet")
-                return
-            }
-            arView.scene.addAnchor(scene)
-        }.store(in: &disposables)
-    }
-
-
-    var shouldUpdateSigns = false
-    var timer: Timer?
-
+    
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
 
-        if !shouldUpdateSigns {
-            return
-        }
-        shouldUpdateSigns = false
-
-        viewModel.arView?.scene
+        store.value.arView?.scene
             .anchors
-            .filter { $0.name == viewModel.signAnchorNameIdentifier }
+            .filter { $0.name == Scene.AnchorCollection.signAnchorNameIdentifier }
             .compactMap { $0 as? AnchorEntity }
             .forEach { plantSignAnchorWrapper in
-                guard let scene = viewModel.loadedPlantSignScene else {
+                guard let scene = store.value.loadedPlantSignScene else {
                     print("we must not have a scene yet")
                     return
                 }
@@ -149,10 +102,10 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
 
                 // Check if there are any pending anchor entity's in the lookup. This may not be necessary anymore
                 print("thisAnchor \(newlyAddedARKitAnchor)")
-                guard let anchorEntityContainingSignEntityAndStringTuple = viewModel.pendingAnchorEntityLookup[newlyAddedARKitAnchor] else {
+                guard let anchorEntityContainingSignEntityAndStringTuple = store.value.pendingAnchorEntityLookup[newlyAddedARKitAnchor] else {
 
                     print("this anchor is not tied to a pending reality kit anchor entity which means it came from the network probably")
-                    guard let plantSignEntityToAttach = viewModel.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
+                    guard let plantSignEntityToAttach = store.value.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
                         print("No plantSignScene was loaded")
                         return
                     }
@@ -172,7 +125,7 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
 
                     // TODO this part might be a bit odd. We are adding it to the arView's scene AND session. I think this isn't correct. I think we need to move one to another place
                     print("// 7. add the anchor to the arView")
-                    self.viewModel.arView?.scene.anchors.append(anchorEntity)
+                    self.store.value.arView?.scene.anchors.append(anchorEntity)
                     #endif
 
                     return
@@ -182,7 +135,7 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
                 // 8. Need to get the world map then verify that this new thing is on there.
                 // 8a. At this point we actually need to wait until we get a signal that the anchors have changed. To the delegate!
                 #if !targetEnvironment(simulator)
-                viewModel.arView?.session.getCurrentWorldMap { (map, getWorldMapError) in
+                store.value.arView?.session.getCurrentWorldMap { (map, getWorldMapError) in
 
                     if let error = getWorldMapError {
                         print("🔴 Error fetching the world map. \(error)")
@@ -253,8 +206,8 @@ extension Entity {
 extension ARDelegate {
     func tapGestureSetup() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tappedOnARView))
-        assert(viewModel.arView != nil)
-        viewModel.arView?.addGestureRecognizer(tapGesture)
+        assert(store.value.arView != nil)
+        store.value.arView?.addGestureRecognizer(tapGesture)
     }
 
     /// Tap gesture input handler.
@@ -279,13 +232,13 @@ extension ARDelegate {
 
         // TODO if we didn't collide with one of our own, then move forward, otherwise bail.
         // TODO at this point i think we can capture the tap, show the alert, send it to the server, then add it to the arview
-        viewModel.showingAlert = .createMarker("Name this plant", arView, raycastResult)
+        store.value.showingAlert = .createMarker("Name this plant", arView, raycastResult)
         #endif
     }
 
     private func checkForCollisions(at touchLocation: CGPoint, on arView: ARView) {
         let hits = arView.hitTest(touchLocation)
-        guard let scene = viewModel.loadedPlantSignScene else {
+        guard let scene = store.value.loadedPlantSignScene else {
             print("we must not have a scene yet")
             return
         }
@@ -308,19 +261,19 @@ extension ARDelegate {
             let overrides = [originalSignEntity.name: entity]
             let notifications = scene.notifications
             notifications.parsedTap.post(overrides: overrides)
-            viewModel.isShowingPlantInfo = true
+            store.value.isShowingPlantInfo = true
         }
     }
 
     fileprivate func addNewAnchor(_ sender: UITapGestureRecognizer) {
         // Get the user's tap screen location.
-        guard let arView = viewModel.arView else {
+        guard let arView = store.value.arView else {
             return
         }
         let touchLocation = sender.location(in: arView)
 
         // do nothing if we are in the adding sign state
-        guard !viewModel.isAddingSign else {
+        guard !store.value.isAddingSign else {
             addSign(at: touchLocation, on: arView)
             return
         }
@@ -340,22 +293,39 @@ extension ARDelegate {
     private func processFetchedWorldMap(map: ARWorldMap, plantName: String, anchorEntityContainingSignEntity: AnchorEntity) throws {
         guard let anchorID = anchorEntityContainingSignEntity.anchorIdentifier
             else {
-                self.viewModel.arView?.scene.removeAnchor(anchorEntityContainingSignEntity)
+                self.store.value.arView?.scene.removeAnchor(anchorEntityContainingSignEntity)
             throw AnchorError.noUniqueIdentifier("We attempted to archive the world but the anchorEntity did not have an anchorIdentifier. It's optional but should be set when added to the session.")
         }
         if let worldData = try? NSKeyedArchiver.archivedData(withRootObject: map, requiringSecureCoding: true) {
             do {
-                try self.viewModel.addAnchor(anchorName: plantName, anchorID: anchorID, worldData: worldData)
+                try self.addAnchor(anchorName: plantName, anchorID: anchorID, worldData: worldData)
             } catch {
-                self.viewModel.arView?.scene.removeAnchor(anchorEntityContainingSignEntity)
+                self.store.value.arView?.scene.removeAnchor(anchorEntityContainingSignEntity)
                 print("Unable to add anchor to the server \(error)")
             }
         } else {
-            self.viewModel.arView?.scene.removeAnchor(anchorEntityContainingSignEntity)
+            self.store.value.arView?.scene.removeAnchor(anchorEntityContainingSignEntity)
             print("no map data")
         }
         // If we have an error we need to remove the anchor
         // TODO we may want to handle the error case outside of this method. There are other scenarios where we may want to remove the anchor
+    }
+    func addAnchor(anchorName: String, anchorID: UUID, worldData: Data) throws {
+        guard let currentSelectedSpace = store.value.selectedSpace else {
+            throw ViewModelError.noSpaceSelected
+        }
+        print("ViewModel:AddAnchor We have a space selected, so send the anchor \(anchorID) \(anchorName) to the network client")
+        var cancellable: AnyCancellable?
+        cancellable = try networkClient.update(space: currentSelectedSpace,
+                                               anchorID: anchorID,
+                                               anchorName: anchorName,
+                                               worldMapData: worldData).sink(receiveCompletion: { error in
+
+                                               }, receiveValue: { anchor in
+                                                print("ViewModel:AddAnchor just saved this anchor \(anchor) with id: \(anchor.id?.uuidString ?? "No ID set for this anchor")")
+                                                self.store.value.selectedSpace?.anchors?.append(anchor)
+                                                cancellable?.cancel()
+                                               })
     }
 }
 

@@ -25,23 +25,21 @@ enum AlertModel: Equatable {
     case showing(String)
 }
 
-extension ViewModel {
+extension ARDelegate {
 
     func loadScene() {
-
-           PlantSigns.loadSignSceneAsync { result in
-               switch result {
-               // this plantEntity holds is the entity we will add to the AnchorEntity
-               case .success(let plantSignScene):
-                   self.loadedPlantSignScene = plantSignScene
-                   self.arView?.scene.addAnchor(plantSignScene)
-               case .failure(let fetchModelError):
-                   fatalError("🔴 Error loading plant signs async: \(fetchModelError)")
-               }
-           }
-       }
+        PlantSigns.loadSignSceneAsync { result in
+            switch result {
+            // this plantEntity holds is the entity we will add to the AnchorEntity
+            case .success(let plantSignScene):
+                self.store.value.loadedPlantSignScene = plantSignScene
+                self.store.value.arView?.scene.addAnchor(plantSignScene)
+            case .failure(let fetchModelError):
+                fatalError("🔴 Error loading plant signs async: \(fetchModelError)")
+            }
+        }
+    }
 }
-
 
 class PlantSignCollisionEntity: Entity, HasCollision {
     var cancellable: Cancellable?
@@ -61,47 +59,63 @@ class PlantSignCollisionEntity: Entity, HasCollision {
     }
 }
 
-class ViewModel: ObservableObject, Identifiable {
-    private let networkClient: NetworkFetching
-    private var disposables = Set<AnyCancellable>()
+final class Store<Value>: ObservableObject {
+    @Published var value: Value
+    init(initialValue: Value) {
+        self.value = initialValue
+    }
+}
 
+struct ViewModel {
     var arView: ARView?
-    @Published var isShowingPlantInfo: Bool = false
-    @Published var isAddingSign: Bool = false
-    @Published var alertViewOutput: String = ""
-    @Published var showingAlert: AlertType = .none
-    @Published var spaces: [SpaceInfo] = []
-    @Published var selectedSpace: SpaceInfo? = nil {
+    var isShowingPlantInfo: Bool = false
+    var isAddingSign: Bool = false
+
+    var showingAlert: AlertType = .none
+    var spaces: [SpaceInfo] = []
+    var selectedSpace: SpaceInfo? = nil {
         didSet {
             if oldValue != selectedSpace {
-                anchors = selectedSpace?.anchors ?? []
+                gotSelectedSpace()
             } else {
                 print("The selectedSpace was set but it's the same as it was before")
             }
         }
     }
 
-    @Published var anchors: [Anchor] = []
+//    var anchors: [Anchor] = []
     var loadedPlantSignScene: PlantSigns.SignScene?
 
-
-    let signAnchorNameIdentifier = "This Is the anchor Entity you are looking for. We added the plantSignScene to this"
     var pendingAnchorEntityLookup: [ARAnchor : (AnchorEntity, String)] = [:]
-    var pendingAnchorEntitySet =  Set<AnchorEntity>()
 
-    init(networkClient: NetworkFetching) {
-        self.networkClient = networkClient
+    private func gotSelectedSpace() {
+        print("🌎 We updated our selected space. Let's consider updating the arView's world configuration")
+        guard let data = selectedSpace?.data else {
+            print("🌎 This is likely a new space with no data saved on the server. Probably fine. But we _may_ be fetching the space data now")
+            return
+        }
+        guard let worldMap = try? NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: data) else {
+            print("🌎 Error loading the world map from the data. Something is pretty wrong here")
+            return
+        }
+        let worldConfiguration = ARWorldTrackingConfiguration()
+        worldConfiguration.initialWorldMap = worldMap
+        guard let arView = arView else {
+            print("🌎 There is no arView to set the world. This is a problem")
+            return
+        }
+        print("The scene itself before run is \(arView.scene.id)")
+        print("🌎 starting new session with world data from the network")
+        #if !targetEnvironment(simulator)
 
-        $alertViewOutput.sink { string in
-            switch self.showingAlert {
-            case .createSpace(_):
-                try? self.makeSpace(named: string)
-            case .createMarker(_, let arView, let raycastResult):
-                self.addSign(named: string, at: raycastResult, on: arView)
-            case .none:
-                print("no-op")
-            }
-        }.store(in: &disposables)
+        arView.session.run(worldConfiguration, options: [.resetTracking, .removeExistingAnchors])
+        #endif
+        print("The scene itself after run is \(arView.scene.id)")
+        guard let scene = loadedPlantSignScene else {
+            print("weird, we haven't loaded the scene yet")
+            return
+        }
+        arView.scene.addAnchor(scene)
     }
 
     func saveTheWorld() {
@@ -128,141 +142,5 @@ class ViewModel: ObservableObject, Identifiable {
         }
         #endif
     }
-    func deleteSpace(at offsets: IndexSet) {
-        try? offsets.map { spaces[$0].id }.forEach { uuid in
-            try networkClient
-                .deleteSpace(uuid: uuid )
-                .sink(receiveCompletion: { error in
-                    print("error deleting \(error)")
-                }, receiveValue: { succeeded in
-                    self.getSpaces()
-                }).store(in: &disposables)
-        }
-    }
 
-    func makeSpace(named name: String) throws {
-        try networkClient.makeSpace(named: name)
-            .sink(receiveCompletion: { result in
-                switch result {
-                case .finished:
-                    print("finished making space")
-                case .failure(let errorWithLocalizedDescription):
-                    print("🔴 Error in fetching \(errorWithLocalizedDescription.localizedDescription)")
-                }
-            }, receiveValue: { newSpaceInfo in
-                print("the new space was created") 
-                self.selectedSpace = newSpaceInfo
-                self.getSpaces()
-            }).store(in: &disposables)
-    }
-
-    func addAnchor(anchorName: String, anchorID: UUID, worldData: Data) throws {
-        guard let currentSelectedSpace = selectedSpace else {
-            throw ViewModelError.noSpaceSelected
-        }
-        print("ViewModel:AddAnchor We have a space selected, so send the anchor \(anchorID) \(anchorName) to the network client")
-        try networkClient.update(space: currentSelectedSpace,
-                                 anchorID: anchorID,
-                                 anchorName: anchorName,
-                                 worldMapData: worldData).sink(receiveCompletion: { error in
-
-                                 }, receiveValue: { anchor in
-                                    print("ViewModel:AddAnchor just saved this anchor \(anchor) with id: \(anchor.id?.uuidString ?? "No ID set for this anchor")")
-                                    self.selectedSpace?.anchors?.append(anchor)
-                                 }).store(in: &disposables)
-    }
-
-    func get(space: SpaceInfo) {
-        networkClient.getSpace(uuid: space.id)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { result in
-                switch result {
-
-                case .finished:
-                    print("got a space")
-                case .failure(let error):
-                    print("🔴 Error fetching single space \(error)")
-                }
-            }) { space in
-                print("ViewModel got a new space \(space)")
-
-                guard let indexOfOldSpace = self.spaces.firstIndex(where: { querySpace -> Bool in
-                    querySpace.id == space.id
-                }) else {
-                    self.spaces.append(space)
-                    return
-                }
-                self.spaces.append(space)
-                // Handle the case where selected space was the one we are fetching
-                if self.selectedSpace == self.spaces[indexOfOldSpace] {
-                    self.selectedSpace = space
-                }
-                self.spaces.remove(at: indexOfOldSpace)
-        }.store(in: &disposables)
-    }
-    func getSpaces() {
-        networkClient.getSpaces
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] value in
-                    guard let self = self else { return }
-                    switch value {
-                    case .failure:
-                        self.spaces = []
-                    case .finished:
-                        break
-                    }
-                },
-                receiveValue: { [weak self] spaces in
-                    guard let self = self else { return }
-                    if let selected = self.selectedSpace {
-                        self.anchors = selected.anchors ?? []
-                    }
-                    self.spaces = spaces
-            })
-            .store(in: &disposables)
-    }
-}
-
-extension ViewModel {
-    func addSign(named name: String, at raycastResult: ARRaycastResult?, on  arView: ARView) {
-        #if !targetEnvironment(simulator)
-
-        // This is us adding the full scene to the
-        guard let clonedPlantSign = self.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
-            print("no plant sign entity")
-            return
-        }
-        // TODO ensure that this top part gets added also
-        guard let extraTop = self.loadedPlantSignScene?.plantSignExtraTop?.clone(recursive: true) else {
-            print("no plant sign entity")
-            return
-        }
-        guard let raycastResult = raycastResult else { return }
-
-        let anchorEntity = AnchorEntity(world: raycastResult.worldTransform)
-        anchorEntity.name = self.signAnchorNameIdentifier
-        let collisionEntity = PlantSignCollisionEntity(plantSignEntity: clonedPlantSign)
-        collisionEntity.addChild(clonedPlantSign)
-        clonedPlantSign.addChild(extraTop)
-        anchorEntity.addChild(collisionEntity)
-
-        collisionEntity.generateCollisionShapes(recursive: true)
-
-        // 5. add an occlusion plane to the anchor for when the sign is down below
-        //                anchorEntity.addOcclusionBox()
-
-        // 6. Set the sign text
-        clonedPlantSign.updatePlantSignName(name: name)
-
-        print("// 7. add the anchor to the arView")
-        arView.scene.addAnchor(anchorEntity)
-        let arKitAnchor = ARAnchor(name: "RemoteUUID-\(UUID().uuidString)", transform: raycastResult.worldTransform)
-        self.pendingAnchorEntityLookup[arKitAnchor] = (anchorEntity, name)
-        arView.session.add(anchor: arKitAnchor)
-        #endif
-
-        // Set us back to the not isAddingSign state
-        self.isAddingSign = false
-    }
 }
