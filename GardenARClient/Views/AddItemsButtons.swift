@@ -76,7 +76,7 @@ struct AddItemsButtons: View {
                 }) {
                     CTAButtonView(title: "+ Space")
                 }
-                if store.value.selectedSpace != nil && !store.value.isShowingPlantInfo {
+                if store.value.shouldShowAddSignButton {
                     Button(action: {
                         self.store.value.isAddingSign = true
                     }) {
@@ -95,7 +95,7 @@ struct AddSpaceButton_Previews: PreviewProvider {
         var viewModel = ViewModel()
         let bananaSpace = SpaceInfo(title: "Banana", id: UUID())
         let store = Store<ViewModel>(initialValue: viewModel)
-        viewModel.selectedSpace = bananaSpace
+        viewModel.selectedSpace = .space(bananaSpace)
         return AddItemsButtons().environmentObject(store)
     }
 }

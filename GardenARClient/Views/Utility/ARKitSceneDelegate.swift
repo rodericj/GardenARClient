@@ -143,7 +143,6 @@ extension ARDelegate {
             }
 
             do {
-                // TODO we need ot pass the REMOTEUUID here over to the server
                 try self.processFetchedWorldMap(map: map, plantName: plantName, anchorUUID: remoteUUID, anchorEntityContainingSignEntity: anchorEntity)
             } catch {
                 print("Unable to process the FetchedWorldMap \(error)")
@@ -161,7 +160,12 @@ extension ARDelegate {
         }
 
         // Look up the entity in the view model
-        guard let selectedSpaceAnchor = store.value.selectedSpace?.anchors?.first(where: { $0.id == remoteUUID }) else {
+        let selectedSpaceInfo = store.value.selectedSpace
+        guard case let SelectedSpaceInfoIsSet.space(selectedSpace) = selectedSpaceInfo else {
+            print("There is no selected space")
+            return
+        }
+        guard let selectedSpaceAnchor = selectedSpace.anchors?.first(where: { $0.id == remoteUUID }) else {
             print("There was no anchor with this remoteUUID: \(remoteUUID) in our anchors array. We may need to consider some cleanup here. What it means is that the world that we had saved before had an anchor that never made it to the server.")
             return
         }
@@ -204,15 +208,10 @@ extension ARDelegate {
 
         let raycastResultsArray = arView.raycast(from: touchLocation, allowing: .estimatedPlane, alignment: .any)
         guard let raycastResult = raycastResultsArray.first else {
-            //                messageLabel.displayMessage("No surface detected, try getting closer.", duration: 2.0)
+            // TODO messageLabel.displayMessage("No surface detected, try getting closer.", duration: 2.0)
             print("No surface detected, try getting closer.")
             return
         }
-
-        print("the raycast results \(raycastResultsArray)")
-
-        // TODO if we didn't collide with one of our own, then move forward, otherwise bail.
-        // TODO at this point i think we can capture the tap, show the alert, send it to the server, then add it to the arview
         store.value.showingAlert = .createMarker("Name this plant", arView, raycastResult)
         #endif
     }
@@ -288,7 +287,7 @@ extension ARDelegate {
     }
 
     func addAnchor(anchorName: String, anchorID: UUID, worldData: Data) throws {
-        guard let currentSelectedSpace = store.value.selectedSpace else {
+        guard case let SelectedSpaceInfoIsSet.space(currentSelectedSpace) = store.value.selectedSpace else {
             throw ViewModelError.noSpaceSelected
         }
         print("ViewModel:AddAnchor We have a space selected, so send the anchor \(anchorID) \(anchorName) to the network client")
@@ -300,7 +299,11 @@ extension ARDelegate {
 
                                                }, receiveValue: { anchor in
                                                 print("ViewModel:AddAnchor just saved this anchor \(anchor) with id: \(anchor.id?.uuidString ?? "No ID set for this anchor")")
-                                                self.store.value.selectedSpace?.anchors?.append(anchor)
+                                                guard case var SelectedSpaceInfoIsSet.space(currentSelectedSpace) = self.store.value.selectedSpace else {
+                                                    print("we have no selected space")
+                                                    return
+                                                }
+                                                currentSelectedSpace.anchors?.append(anchor)
                                                 cancellable?.cancel()
                                                })
     }

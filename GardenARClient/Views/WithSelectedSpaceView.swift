@@ -39,20 +39,16 @@ struct WithSelectedSpaceView: View {
                         }
                     }.padding()
                 }
-            } else {
+            } else if store.value.selectedSpace != .none {
                 AddItemsButtons()
             }
             VStack {
                 Button(action: {
-                    self.store.value.selectedSpace = nil
+                    self.store.value.selectedSpace = .none
                 }) {
-                    CTAButtonView(title: "Space: \(store.value.selectedSpace?.title ?? "")")
-                }
-                Button(action: {
-                    self.store.value.saveTheWorld()
-                    print("save world")
-                }) {
-                    Text("Save the world")
+                    if self.store.value.selectedSpace != .none {
+                        CTAButtonView(title: store.value.selectedSpace.title)
+                    }
                 }
                 Spacer()
             }
@@ -66,19 +62,19 @@ struct WithSelectedSpaceView_Previews: PreviewProvider {
         let bananaSpace = SpaceInfo(title: "Banana", id: UUID())
         let appleSpace = SpaceInfo(title: "Apple", id: UUID())
         var viewModelWithTwoSpaces = ViewModel()
-        viewModelWithTwoSpaces.selectedSpace = appleSpace
-        viewModelWithTwoSpaces.spaces = [appleSpace, bananaSpace]
+        viewModelWithTwoSpaces.selectedSpace = .space(appleSpace)
+        viewModelWithTwoSpaces.spaces = .fetched([appleSpace, bananaSpace])
         let storeWithTwoSpaces = Store<ViewModel>(initialValue: viewModelWithTwoSpaces)
 
         var viewModelWithOneSpaceIsAddingSign = ViewModel()
-        viewModelWithOneSpaceIsAddingSign.selectedSpace = bananaSpace
-        viewModelWithOneSpaceIsAddingSign.spaces = [bananaSpace]
+        viewModelWithOneSpaceIsAddingSign.selectedSpace = .space(bananaSpace)
+        viewModelWithOneSpaceIsAddingSign.spaces = .fetched([bananaSpace])
         viewModelWithOneSpaceIsAddingSign.isAddingSign = true
         let storeWithOneSpaceIsAdding = Store<ViewModel>(initialValue: viewModelWithOneSpaceIsAddingSign)
 
         var viewModelWithOneSpace = ViewModel()
-        viewModelWithOneSpace.selectedSpace = bananaSpace
-        viewModelWithOneSpace.spaces = [bananaSpace]
+        viewModelWithOneSpace.selectedSpace = .space(bananaSpace)
+        viewModelWithOneSpace.spaces = .fetched([bananaSpace])
         let storeWithOneSpace = Store<ViewModel>(initialValue: viewModelWithOneSpace)
 
         return Group {

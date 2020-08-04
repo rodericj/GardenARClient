@@ -27,15 +27,15 @@ struct ContentView : View {
         ZStack {
             ARViewContainer(sceneDelegate: sceneDelegate, store: store)
                 .edgesIgnoringSafeArea(.all)
-            if store.value.selectedSpace == nil {
-                NoSelectedSpaceView(networkClient: networkClient)
-            } else {
-                WithSelectedSpaceView()
-            }
+            WithSelectedSpaceView()
+            // The alert view workaround. This could be it's own view in a popover. It's cleaner
             containedView()
         }
         .popover(isPresented: $store.value.isShowingPlantInfo, attachmentAnchor: .point(.bottomTrailing), arrowEdge: .bottom) {
             PlantInfo()
+        }
+        .popover(isPresented: $store.value.isShowingSpaceSelectionView, attachmentAnchor: .point(.top), arrowEdge: .top) {
+            SpacesListView(networkClient: self.networkClient).environmentObject(self.store).frame(width: 300, height: 600)
         }
     }
 
@@ -73,6 +73,27 @@ struct ContentView : View {
 }
 
 extension ContentView {
+    // TODO move network things like this a coordinator between the network and the view model
+    private func getSpaces() {
+        var cancellable: AnyCancellable?
+        cancellable = networkClient.getSpaces
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { value in
+                    switch value {
+                    case .failure(let error):
+                        self.store.value.spaces = .failed(error)
+                    case .finished:
+                        break
+                    }
+                },
+                receiveValue: { spaces in
+                    self.store.value.spaces = .fetched(spaces)
+                    cancellable?.cancel()
+            })
+
+    }
+
     func makeSpace(named name: String) throws {
         var cancellable: AnyCancellable?
         cancellable = try networkClient.makeSpace(named: name)
@@ -85,8 +106,18 @@ extension ContentView {
                 }
             }, receiveValue: { newSpaceInfo in
                 print("the new space was created")
-                self.store.value.spaces.append(newSpaceInfo)
-                self.store.value.selectedSpace = newSpaceInfo
+                switch self.store.value.spaces {
+
+                case .fetching:
+                    self.store.value.spaces = .fetched([newSpaceInfo])
+                case .fetched(let fetchedSpaces):
+                    var copy = fetchedSpaces
+                    copy.append(newSpaceInfo)
+                    self.store.value.spaces = .fetched(copy)
+                case .failed(let error):
+                    print("error making a space \(error)")
+                }
+                self.store.value.selectedSpace = .space(newSpaceInfo)
                 cancellable?.cancel()
             })
     }
@@ -121,7 +152,7 @@ extension ContentView {
         // 6. Set the sign text
         clonedPlantSign.updatePlantSignName(name: name)
 
-        print("// 7. add the anchor to the arView")
+        print("// 7. From Content View add the anchor to the arView")
         arView.scene.addAnchor(anchorEntity)
         let arKitAnchor = ARAnchor(name: "RemoteUUID-\(UUID().uuidString)", transform: raycastResult.worldTransform)
         store.value.pendingAnchorEntityLookup[arKitAnchor] = (anchorEntity, name)
@@ -133,7 +164,8 @@ extension ContentView {
     }
 
     func addAnchor(anchorName: String, anchorID: UUID, worldData: Data) throws {
-        guard let currentSelectedSpace = store.value.selectedSpace else {
+        guard case let SelectedSpaceInfoIsSet.space(currentSelectedSpace) = store.value.selectedSpace else {
+            print("we have no selected space")
             throw ViewModelError.noSpaceSelected
         }
         print("ViewModel:AddAnchor We have a space selected, so send the anchor \(anchorID) \(anchorName) to the network client")
@@ -145,7 +177,11 @@ extension ContentView {
 
                                                }, receiveValue: { anchor in
                                                 print("ViewModel:AddAnchor just saved this anchor \(anchor) with id: \(anchor.id?.uuidString ?? "No ID set for this anchor")")
-                                                self.store.value.selectedSpace?.anchors?.append(anchor)
+                                                guard case var SelectedSpaceInfoIsSet.space(currentSelectedSpace) = self.store.value.selectedSpace else {
+                                                    print("we have no selected space")
+                                                    return
+                                                }
+                                                currentSelectedSpace.anchors?.append(anchor)
                                                 cancellable?.cancel()
                                                })
     }
@@ -211,7 +247,7 @@ struct ContentView_Previews : PreviewProvider {
 
     static var previews: some View {
         var viewModelWithSelected = ViewModel()
-        viewModelWithSelected.selectedSpace = SpaceInfo(title: "Banana", id: UUID())
+        viewModelWithSelected.selectedSpace = .space(SpaceInfo(title: "Banana", id: UUID()))
         let storeSelected = Store<ViewModel>(initialValue: viewModelWithSelected)
 
         let viewModelWithoutSelected = ViewModel()
@@ -222,12 +258,12 @@ struct ContentView_Previews : PreviewProvider {
         let storeShowingAlert = Store<ViewModel>(initialValue: viewModelShowingAlert)
 
         var viewModelShowingListNoAlert = ViewModel()
-        viewModelShowingListNoAlert.selectedSpace = nil
+        viewModelShowingListNoAlert.selectedSpace = .none
         let storeShowingListNoAlert = Store<ViewModel>(initialValue: viewModelShowingListNoAlert)
 
         var viewModelShowingListAndAlert = ViewModel()
-        viewModelShowingListAndAlert.selectedSpace = nil
-        viewModelShowingListAndAlert.spaces = [SpaceInfo(title: "Banana", id: UUID())]
+        viewModelShowingListAndAlert.selectedSpace = .none
+        viewModelShowingListAndAlert.spaces = .fetched([SpaceInfo(title: "Banana", id: UUID())])
         viewModelShowingListAndAlert.showingAlert = .createMarker("Hello there", ARView(), nil)
         let storeShowingListAndAlert = Store<ViewModel>(initialValue: viewModelShowingListAndAlert)
 

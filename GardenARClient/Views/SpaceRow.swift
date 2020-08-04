@@ -10,7 +10,7 @@ import SwiftUI
 import Combine
 struct SpaceRow: View {
     let spaceInfo: SpaceInfo
-    @Binding var selected: SpaceInfo?
+    @Binding var selected: SelectedSpaceInfoIsSet
     @EnvironmentObject var store: Store<ViewModel>
     let networkClient: NetworkClient
     
@@ -18,7 +18,7 @@ struct SpaceRow: View {
         Button(action: {
             print("🌎 Select space \(self.spaceInfo.title)")
             self.get(space: self.spaceInfo)
-            self.selected = self.spaceInfo
+            self.selected = .space(self.spaceInfo)
         }) {
             VStack(alignment: .leading) {
                 Text(spaceInfo.title).font(.largeTitle).autocapitalization(.words)
@@ -36,32 +36,26 @@ extension SpaceRow {
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { result in
                 switch result {
-
                 case .finished:
                     print("got a space")
                 case .failure(let error):
                     print("🔴 Error fetching single space \(error)")
                 }
             }) { space in
-                print("ViewModel got a new space \(space)")
-
-                guard let indexOfOldSpace = self.store.value.spaces.firstIndex(where: { querySpace -> Bool in
+                guard let indexOfOldSpace = self.store.value.spaces.all.firstIndex(where: { querySpace -> Bool in
                     querySpace.id == space.id
                 }) else {
-                    self.store.value.spaces.append(space)
-
+                    self.store.appendSpace(spaceInfo: space)
                     cancellable?.cancel()
                     return
                 }
-                self.store.value.spaces.append(space)
-                // Handle the case where selected space was the one we are fetching
-                if self.store.value.selectedSpace == self.store.value.spaces[indexOfOldSpace] {
-                    self.store.value.selectedSpace = space
-                }
-                self.store.value.spaces.remove(at: indexOfOldSpace)
+                self.store.appendSpace(spaceInfo: space)
+                self.store.value.selectedSpace = .space(space)
+                self.store.removeSpace(at: indexOfOldSpace)
                 cancellable?.cancel()
         }
     }
+
 }
 
 //struct SpaceRow_Previews: PreviewProvider {

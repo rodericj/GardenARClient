@@ -16,7 +16,7 @@ struct SpacesListView: View {
         NavigationView {
             ZStack {
                 List {
-                    ForEach(store.value.spaces) { space in
+                    ForEach(store.value.spaces.all) { space in
                         SpaceRow(spaceInfo: space, selected: self.$store.value.selectedSpace, networkClient: self.networkClient)
                     }.onDelete(perform: delete)
                 }.onAppear(perform: getSpaces)
@@ -32,7 +32,7 @@ struct SpacesListView: View {
 
 extension SpacesListView {
     func deleteSpace(at offsets: IndexSet) {
-        try? offsets.map { store.value.spaces[$0].id }.forEach { uuid in
+        try? offsets.map { store.value.spaces.all[$0].id }.forEach { uuid in
             var cancellable: AnyCancellable?
             cancellable = try networkClient
                 .deleteSpace(uuid: uuid )
@@ -51,14 +51,14 @@ extension SpacesListView {
             .sink(
                 receiveCompletion: { value in
                     switch value {
-                    case .failure:
-                        self.store.value.spaces = []
+                    case .failure(let error):
+                        self.store.value.spaces = .failed(error)
                     case .finished:
                         break
                     }
                 },
                 receiveValue: { spaces in
-                    self.store.value.spaces = spaces
+                    self.store.value.spaces = .fetched(spaces)
                     cancellable?.cancel()
             })
     }
@@ -67,8 +67,8 @@ extension SpacesListView {
 struct SpacesListView_Previews: PreviewProvider {
     static var previews: some View {
         var viewModel = ViewModel()
-        viewModel.spaces = [SpaceInfo(title: "banana", id: UUID()),
-                            SpaceInfo(title: "some other space", id: UUID())]
+        viewModel.spaces = .fetched([SpaceInfo(title: "banana", id: UUID()),
+                                     SpaceInfo(title: "some other space", id: UUID())])
         let store = Store<ViewModel>(initialValue: viewModel)
         return SpacesListView(networkClient: NetworkClient()).environmentObject(store)
     }

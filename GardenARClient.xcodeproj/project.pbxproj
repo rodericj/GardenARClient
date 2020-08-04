@@ -23,8 +23,8 @@
 		5F92348E24B981C60019EBE8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5F92348C24B981C60019EBE8 /* LaunchScreen.storyboard */; };
 		5F92349924B981C70019EBE8 /* GardenARClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F92349824B981C70019EBE8 /* GardenARClientTests.swift */; };
 		5F9234A424B981EE0019EBE8 /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9234A324B981EE0019EBE8 /* NetworkClient.swift */; };
-		5FA12A7C24BCCB6B00C6E059 /* NoSelectedSpaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA12A7B24BCCB6B00C6E059 /* NoSelectedSpaceView.swift */; };
 		5FA12A7E24BCD2C800C6E059 /* WithSelectedSpaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA12A7D24BCD2C800C6E059 /* WithSelectedSpaceView.swift */; };
+		5FC2525B24D9260500DD3F1B /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC2525A24D9260500DD3F1B /* Store.swift */; };
 		5FC8F4AF24BAB6A300C3F87C /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */; };
 		5FC8F4B224BABCFD00C3F87C /* SpacesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B124BABCFD00C3F87C /* SpacesListView.swift */; };
 		5FC8F4B424BABD8300C3F87C /* SpaceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B324BABD8200C3F87C /* SpaceRow.swift */; };
@@ -63,8 +63,8 @@
 		5F92349824B981C70019EBE8 /* GardenARClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenARClientTests.swift; sourceTree = "<group>"; };
 		5F92349A24B981C70019EBE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5F9234A324B981EE0019EBE8 /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
-		5FA12A7B24BCCB6B00C6E059 /* NoSelectedSpaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoSelectedSpaceView.swift; sourceTree = "<group>"; };
 		5FA12A7D24BCD2C800C6E059 /* WithSelectedSpaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithSelectedSpaceView.swift; sourceTree = "<group>"; };
+		5FC2525A24D9260500DD3F1B /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
 		5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		5FC8F4B124BABCFD00C3F87C /* SpacesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacesListView.swift; sourceTree = "<group>"; };
 		5FC8F4B324BABD8200C3F87C /* SpaceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceRow.swift; sourceTree = "<group>"; };
@@ -167,6 +167,7 @@
 				5F9234A324B981EE0019EBE8 /* NetworkClient.swift */,
 				5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */,
 				5FEACEF924C263910016F885 /* Anchor.swift */,
+				5FC2525A24D9260500DD3F1B /* Store.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -179,7 +180,6 @@
 				5FC8F4B124BABCFD00C3F87C /* SpacesListView.swift */,
 				5FC8F4B324BABD8200C3F87C /* SpaceRow.swift */,
 				5F18CEB524BAD78D00E10753 /* AddItemsButtons.swift */,
-				5FA12A7B24BCCB6B00C6E059 /* NoSelectedSpaceView.swift */,
 				5FA12A7D24BCD2C800C6E059 /* WithSelectedSpaceView.swift */,
 				5F7531A224C5703F00449C26 /* ActivityIndicator.swift */,
 				5F7531A624C761ED00449C26 /* AlertView.swift */,
@@ -312,13 +312,13 @@
 				5FC8F4B224BABCFD00C3F87C /* SpacesListView.swift in Sources */,
 				5F92348424B981C30019EBE8 /* ContentView.swift in Sources */,
 				5F7531A524C671C300449C26 /* PlantSigns.rcproject in Sources */,
+				5FC2525B24D9260500DD3F1B /* Store.swift in Sources */,
 				5F18CEB624BAD78D00E10753 /* AddItemsButtons.swift in Sources */,
 				5FEACEF524C10F600016F885 /* ARKitSceneDelegate.swift in Sources */,
 				5F92348224B981C30019EBE8 /* AppDelegate.swift in Sources */,
 				5FEACEFA24C263910016F885 /* Anchor.swift in Sources */,
 				5F123D7824D54299006F16E6 /* PlantInfo.swift in Sources */,
 				5F9234A424B981EE0019EBE8 /* NetworkClient.swift in Sources */,
-				5FA12A7C24BCCB6B00C6E059 /* NoSelectedSpaceView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

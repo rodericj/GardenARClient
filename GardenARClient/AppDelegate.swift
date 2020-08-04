@@ -25,7 +25,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let arDelegate = ARDelegate(store: store, networkClient: networkClient)
         arDelegate.loadScene()
-        getSpaces()
         let contentView = ContentView(sceneDelegate: arDelegate, networkClient: networkClient).environmentObject(store)
         // Use a UIHostingController as window root view controller.
         let window = UIWindow(frame: UIScreen.main.bounds)
@@ -35,25 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    private func getSpaces() {
-        networkClient.getSpaces
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] value in
-                    guard let self = self else { return }
-                    switch value {
-                    case .failure:
-                        self.store.value.spaces = []
-                    case .finished:
-                        break
-                    }
-                },
-                receiveValue: { [weak self] spaces in
-                    guard let self = self else { return }
-                    self.store.value.spaces = spaces
-            }).store(in: &disposables)
-
-    }
+    
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
@@ -70,7 +51,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     }
-
-
 }
 

@@ -59,10 +59,48 @@ class PlantSignCollisionEntity: Entity, HasCollision {
     }
 }
 
-final class Store<Value>: ObservableObject {
-    @Published var value: Value
-    init(initialValue: Value) {
-        self.value = initialValue
+enum SelectedSpaceInfoIsSet: Equatable {
+    case none
+    case space(SpaceInfo)
+
+    var title: String {
+        get {
+            switch self {
+            case .none:
+                return "Fetching..."
+            case .space(let spaceInfo):
+                return spaceInfo.title
+            }
+        }
+    }
+}
+
+enum SpaceInfoFetch {
+    case fetching
+    case fetched([SpaceInfo])
+    case failed(Error)
+    var all: [SpaceInfo] {
+        get {
+            switch self {
+            case .fetching:
+                return []
+            case .fetched(let spaceInfos):
+                return spaceInfos
+            case .failed:
+                return []
+            }
+        }
+    }
+
+    var isFetching: Bool {
+        get {
+            switch self {
+            case .fetching:
+                return true
+            case .fetched(_), .failed:
+                return false
+            }
+        }
     }
 }
 
@@ -70,15 +108,26 @@ struct ViewModel {
     var arView: ARView?
     var isShowingPlantInfo: Bool = false
     var isAddingSign: Bool = false
-
+    var isShowingSpaceSelectionView: Bool = true
+    var shouldShowAddSignButton: Bool {
+        get {
+            selectedSpace != .none && !isShowingPlantInfo && !isShowingSpaceSelectionView
+        }
+    }
     var showingAlert: AlertType = .none
-    var spaces: [SpaceInfo] = []
-    var selectedSpace: SpaceInfo? = nil {
+    var spaces: SpaceInfoFetch = .fetching {
+        didSet {
+            isShowingSpaceSelectionView = selectedSpace == .none
+            print("spaces \(spaces)")
+        }
+    }
+    var selectedSpace: SelectedSpaceInfoIsSet = .none {
         didSet {
             if oldValue != selectedSpace {
                 gotSelectedSpace()
-            } else {
-                print("The selectedSpace was set but it's the same as it was before")
+            }
+            if selectedSpace == .none {
+                isShowingSpaceSelectionView = true
             }
         }
     }
@@ -89,7 +138,10 @@ struct ViewModel {
 
     private func gotSelectedSpace() {
         print("🌎 We updated our selected space. Let's consider updating the arView's world configuration")
-        guard let data = selectedSpace?.data else {
+        guard case SelectedSpaceInfoIsSet.space(let spaceInfo) = selectedSpace else {
+            return
+        }
+        guard let data = spaceInfo.data else {
             print("🌎 This is likely a new space with no data saved on the server. Probably fine. But we _may_ be fetching the space data now")
             return
         }
