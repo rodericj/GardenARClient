@@ -83,10 +83,9 @@ struct ViewModel {
         }
     }
 
-//    var anchors: [Anchor] = []
     var loadedPlantSignScene: PlantSigns.SignScene?
 
-    var pendingAnchorEntityLookup: [ARAnchor : (AnchorEntity, String)] = [:]
+    var pendingAnchorEntityLookup: [ARAnchor : (anchorEntity: AnchorEntity, plantName: String)] = [:]
 
     private func gotSelectedSpace() {
         print("🌎 We updated our selected space. Let's consider updating the arView's world configuration")
@@ -117,30 +116,4 @@ struct ViewModel {
         }
         arView.scene.addAnchor(scene)
     }
-
-    func saveTheWorld() {
-        #if !targetEnvironment(simulator)
-
-        arView?.session.getCurrentWorldMap { (map, getWorldMapError) in
-
-            if let error = getWorldMapError {
-                print("🔴 Error fetching the world map. \(error)")
-                return
-            }
-            guard let map = map else {
-                print("🔴 Couldn't fetch the world map, but no error.")
-                return
-            }
-
-            print(map.anchors)
-//            do {
-//                try self.processFetchedWorldMap(map: map, plantName: plantName, anchorEntity: anchorEntity)
-//            } catch {
-//                print("Unable to process the FetchedWorldMap \(error)")
-//            }
-
-        }
-        #endif
-    }
-
 }
