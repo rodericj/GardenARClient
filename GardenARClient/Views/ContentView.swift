@@ -34,7 +34,11 @@ struct ContentView : View {
             PlantInfo()
         }
         .popover(isPresented: $store.value.isShowingSpaceSelectionView, attachmentAnchor: .point(.top), arrowEdge: .top) {
-            SpacesListView().environmentObject(self.store).frame(width: 300, height: 600)
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                SpacesListView().environmentObject(self.store).frame(width: 300, height: 600)
+            } else {
+                SpacesListView().environmentObject(self.store)
+            }
         }
     }
 
