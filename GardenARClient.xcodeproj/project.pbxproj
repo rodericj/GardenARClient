@@ -25,6 +25,7 @@
 		5F9234A424B981EE0019EBE8 /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F9234A324B981EE0019EBE8 /* NetworkClient.swift */; };
 		5FA12A7E24BCD2C800C6E059 /* WithSelectedSpaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA12A7D24BCD2C800C6E059 /* WithSelectedSpaceView.swift */; };
 		5FC2525B24D9260500DD3F1B /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC2525A24D9260500DD3F1B /* Store.swift */; };
+		5FC2525D24D92C1700DD3F1B /* NetworkStoreCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC2525C24D92C1700DD3F1B /* NetworkStoreCoordinator.swift */; };
 		5FC8F4AF24BAB6A300C3F87C /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */; };
 		5FC8F4B224BABCFD00C3F87C /* SpacesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B124BABCFD00C3F87C /* SpacesListView.swift */; };
 		5FC8F4B424BABD8300C3F87C /* SpaceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC8F4B324BABD8200C3F87C /* SpaceRow.swift */; };
@@ -65,6 +66,7 @@
 		5F9234A324B981EE0019EBE8 /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
 		5FA12A7D24BCD2C800C6E059 /* WithSelectedSpaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WithSelectedSpaceView.swift; sourceTree = "<group>"; };
 		5FC2525A24D9260500DD3F1B /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
+		5FC2525C24D92C1700DD3F1B /* NetworkStoreCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkStoreCoordinator.swift; sourceTree = "<group>"; };
 		5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		5FC8F4B124BABCFD00C3F87C /* SpacesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpacesListView.swift; sourceTree = "<group>"; };
 		5FC8F4B324BABD8200C3F87C /* SpaceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceRow.swift; sourceTree = "<group>"; };
@@ -168,6 +170,7 @@
 				5FC8F4AE24BAB6A300C3F87C /* ViewModel.swift */,
 				5FEACEF924C263910016F885 /* Anchor.swift */,
 				5FC2525A24D9260500DD3F1B /* Store.swift */,
+				5FC2525C24D92C1700DD3F1B /* NetworkStoreCoordinator.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -302,6 +305,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5FC2525D24D92C1700DD3F1B /* NetworkStoreCoordinator.swift in Sources */,
 				5F7531A924C7700100449C26 /* KeyboardHelper.swift in Sources */,
 				5FA12A7E24BCD2C800C6E059 /* WithSelectedSpaceView.swift in Sources */,
 				5FC8F4AF24BAB6A300C3F87C /* ViewModel.swift in Sources */,

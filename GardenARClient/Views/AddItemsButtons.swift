@@ -71,10 +71,12 @@ struct AddItemsButtons: View {
         VStack {
             Spacer()
             HStack {
-                Button(action: {
-                    self.store.value.showingAlert = .createSpace("Add a new Space")
-                }) {
-                    CTAButtonView(title: "+ Space")
+                if store.value.selectedSpace == .none {
+                    Button(action: {
+                        self.store.value.showingAlert = .createSpace("Add a new Space")
+                    }) {
+                        CTAButtonView(title: "+ Space")
+                    }
                 }
                 if store.value.shouldShowAddSignButton {
                     Button(action: {
@@ -94,7 +96,7 @@ struct AddSpaceButton_Previews: PreviewProvider {
     static var previews: some View {
         var viewModel = ViewModel()
         let bananaSpace = SpaceInfo(title: "Banana", id: UUID())
-        let store = Store<ViewModel>(initialValue: viewModel)
+        let store = Store<ViewModel>(initialValue: viewModel, networkClient: NetworkClient())
         viewModel.selectedSpace = .space(bananaSpace)
         return AddItemsButtons().environmentObject(store)
     }

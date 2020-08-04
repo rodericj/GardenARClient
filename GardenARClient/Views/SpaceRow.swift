@@ -12,12 +12,11 @@ struct SpaceRow: View {
     let spaceInfo: SpaceInfo
     @Binding var selected: SelectedSpaceInfoIsSet
     @EnvironmentObject var store: Store<ViewModel>
-    let networkClient: NetworkClient
-    
+
     var body: some View {
         Button(action: {
             print("🌎 Select space \(self.spaceInfo.title)")
-            self.get(space: self.spaceInfo)
+            self.store.get(space: self.spaceInfo)
             self.selected = .space(self.spaceInfo)
         }) {
             VStack(alignment: .leading) {
@@ -27,35 +26,6 @@ struct SpaceRow: View {
             }
         }
     }
-}
-extension SpaceRow {
-    func get(space: SpaceInfo) {
-        var cancellable: AnyCancellable?
-        cancellable = networkClient.getSpace(uuid: space.id)
-            
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { result in
-                switch result {
-                case .finished:
-                    print("got a space")
-                case .failure(let error):
-                    print("🔴 Error fetching single space \(error)")
-                }
-            }) { space in
-                guard let indexOfOldSpace = self.store.value.spaces.all.firstIndex(where: { querySpace -> Bool in
-                    querySpace.id == space.id
-                }) else {
-                    self.store.appendSpace(spaceInfo: space)
-                    cancellable?.cancel()
-                    return
-                }
-                self.store.appendSpace(spaceInfo: space)
-                self.store.value.selectedSpace = .space(space)
-                self.store.removeSpace(at: indexOfOldSpace)
-                cancellable?.cancel()
-        }
-    }
-
 }
 
 //struct SpaceRow_Previews: PreviewProvider {

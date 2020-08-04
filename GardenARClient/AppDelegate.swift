@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     let networkClient = NetworkClient()
     lazy var viewModel = ViewModel()
-    lazy var store = Store<ViewModel>(initialValue: viewModel)
+    lazy var store = Store<ViewModel>(initialValue: viewModel, networkClient: networkClient)
     private var disposables = Set<AnyCancellable>()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -25,7 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let arDelegate = ARDelegate(store: store, networkClient: networkClient)
         arDelegate.loadScene()
-        let contentView = ContentView(sceneDelegate: arDelegate, networkClient: networkClient).environmentObject(store)
+        let contentView = ContentView(sceneDelegate: arDelegate).environmentObject(store)
         // Use a UIHostingController as window root view controller.
         let window = UIWindow(frame: UIScreen.main.bounds)
         window.rootViewController = UIHostingController(rootView: contentView)

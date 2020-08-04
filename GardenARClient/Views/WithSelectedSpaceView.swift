@@ -64,18 +64,18 @@ struct WithSelectedSpaceView_Previews: PreviewProvider {
         var viewModelWithTwoSpaces = ViewModel()
         viewModelWithTwoSpaces.selectedSpace = .space(appleSpace)
         viewModelWithTwoSpaces.spaces = .fetched([appleSpace, bananaSpace])
-        let storeWithTwoSpaces = Store<ViewModel>(initialValue: viewModelWithTwoSpaces)
+        let storeWithTwoSpaces = Store<ViewModel>(initialValue: viewModelWithTwoSpaces, networkClient: NetworkClient())
 
         var viewModelWithOneSpaceIsAddingSign = ViewModel()
         viewModelWithOneSpaceIsAddingSign.selectedSpace = .space(bananaSpace)
         viewModelWithOneSpaceIsAddingSign.spaces = .fetched([bananaSpace])
         viewModelWithOneSpaceIsAddingSign.isAddingSign = true
-        let storeWithOneSpaceIsAdding = Store<ViewModel>(initialValue: viewModelWithOneSpaceIsAddingSign)
+        let storeWithOneSpaceIsAdding = Store<ViewModel>(initialValue: viewModelWithOneSpaceIsAddingSign, networkClient: NetworkClient())
 
         var viewModelWithOneSpace = ViewModel()
         viewModelWithOneSpace.selectedSpace = .space(bananaSpace)
         viewModelWithOneSpace.spaces = .fetched([bananaSpace])
-        let storeWithOneSpace = Store<ViewModel>(initialValue: viewModelWithOneSpace)
+        let storeWithOneSpace = Store<ViewModel>(initialValue: viewModelWithOneSpace, networkClient: NetworkClient())
 
         return Group {
             WithSelectedSpaceView().environmentObject(storeWithTwoSpaces)
