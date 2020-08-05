@@ -58,7 +58,7 @@ extension Store where Value == ViewModel {
                     return
                 }
                 self.appendSpace(spaceInfo: space)
-                self.value.selectedSpace = .space(space)
+                spaceSelectionReducer(viewModel: &self.value, action: .selectSpace(space))
                 self.removeSpace(at: indexOfOldSpace)
                 cancellable?.cancel()
         }

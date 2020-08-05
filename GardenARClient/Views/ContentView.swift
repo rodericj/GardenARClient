@@ -201,9 +201,10 @@ class TestARSession: NSObject, ARSessionDelegate, HasOptionalARView {
 struct ContentView_Previews : PreviewProvider {
 
     static var previews: some View {
+
         var viewModelWithSelected = ViewModel()
-        viewModelWithSelected.selectedSpace = .space(SpaceInfo(title: "Banana", id: UUID()))
         let storeSelected = Store<ViewModel>(initialValue: viewModelWithSelected, networkClient: NetworkClient())
+        spaceSelectionReducer(viewModel: &viewModelWithSelected, action: .selectSpace(SpaceInfo(title: "Banana", id: UUID())))
 
         let viewModelWithoutSelected = ViewModel()
         let storeWithoutSelected = Store<ViewModel>(initialValue: viewModelWithoutSelected, networkClient: NetworkClient())
@@ -212,8 +213,7 @@ struct ContentView_Previews : PreviewProvider {
         viewModelShowingAlert.showingAlert = .createMarker("Hello there", ARView(), nil)
         let storeShowingAlert = Store<ViewModel>(initialValue: viewModelShowingAlert, networkClient: NetworkClient())
 
-        var viewModelShowingListNoAlert = ViewModel()
-        viewModelShowingListNoAlert.selectedSpace = .none
+        let viewModelShowingListNoAlert = ViewModel()
         let storeShowingListNoAlert = Store<ViewModel>(initialValue: viewModelShowingListNoAlert, networkClient: NetworkClient())
 
         var viewModelShowingListAndAlert = ViewModel()

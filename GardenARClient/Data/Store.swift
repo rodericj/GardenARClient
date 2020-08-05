@@ -15,5 +15,21 @@ final class Store<Value>: ObservableObject {
         self.value = initialValue
         self.networkClient = networkClient
     }
+}
 
+enum SelectedSpaceAction {
+    case selectSpace(SpaceInfo)
+    case clearSpace
+}
+
+func spaceSelectionReducer( viewModel: inout ViewModel, action: SelectedSpaceAction) {
+    switch action {
+
+    case .selectSpace(let space):
+        viewModel.selectedSpace = SelectedSpaceInfoIsSet.space(space)
+        break
+    case .clearSpace:
+        viewModel.selectedSpace = .none
+        break
+    }
 }
