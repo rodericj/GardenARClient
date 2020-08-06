@@ -15,6 +15,7 @@ import Combine
 protocol HasOptionalARView {
     func tapGestureSetup()
     func updateWithEntity(entity: HasAnchoring)
+    func setupObservers(arView: ARView)
 }
 
 
@@ -65,6 +66,10 @@ extension ContentView {
     func addSign(named name: String, at raycastResult: ARRaycastResult?, on  arView: ARView) {
         #if !targetEnvironment(simulator)
 
+        guard let originalSignEntityScene = self.store.value.loadedPlantSignScene else {
+            print("There is no original plant sign scene")
+            return
+        }
         // This is us adding the full scene to the
         guard let clonedPlantSign = self.store.value.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
             print("no plant sign entity")
@@ -101,6 +106,11 @@ extension ContentView {
 
         // Set us back to the not isAddingSign state
         store.value.isAddingSign = false
+
+        let notifications = originalSignEntityScene.notifications
+        let overrides = [originalSignEntityScene.name: clonedPlantSign]
+//        notifications.lookAtCamera.post(overrides: overrides)
+
     }
 
     func addAnchor(anchorName: String, anchorID: UUID, worldData: Data) throws {
@@ -141,12 +151,15 @@ final class ARViewContainer: UIViewRepresentable {
 
     func makeUIView(context: Context) -> ARView {
         let arView = ARView(frame: .zero)
+
+        
         store.value.arView = arView
         #if !targetEnvironment(simulator)
         arView.session.delegate = sceneDelegate
         sceneDelegate.tapGestureSetup()
+        sceneDelegate.setupObservers(arView: arView)
         #endif
-        arView.addCoaching()
+//        arView.addCoaching()
         return arView
     }
 
@@ -176,6 +189,10 @@ extension ARView: ARCoachingOverlayViewDelegate {
 
 #if DEBUG
 class TestARSession: NSObject, ARSessionDelegate, HasOptionalARView {
+    func setupObservers(arView: ARView) {
+
+    }
+
     func updateWithEntity(entity: HasAnchoring) {
         
     }

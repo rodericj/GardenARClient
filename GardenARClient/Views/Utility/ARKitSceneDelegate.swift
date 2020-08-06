@@ -17,7 +17,7 @@ enum AnchorError: Error {
 }
 
 extension Scene.AnchorCollection {
-    static let signAnchorNameIdentifier = "This Is the anchor Entity you are looking for. We added the plantSignScene to this"
+    static let signAnchorNameIdentifier = "AnchorEntity For A Plant Sign"
 }
 
 class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDelegate {
@@ -35,16 +35,42 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
     init(store: Store<ViewModel>, networkClient: NetworkClient) {
         self.store = store
         self.networkClient = networkClient
-    }
-    
-    func session(_ session: ARSession, didUpdate frame: ARFrame) {
 
-        store.value.arView?.scene
-            .anchors
-            .filter { $0.name == Scene.AnchorCollection.signAnchorNameIdentifier }
-            .compactMap { $0 as? AnchorEntity }
-            .forEach { plantSignAnchorWrapper in
-                guard let scene = store.value.loadedPlantSignScene else {
+    }
+
+    func setupObservers(arView: ARView) {
+
+        // When an anchor is added, we need to trigger the lookAtCamera notification which is set to repeat
+        arView.scene.publisher(for: SceneEvents.AnchoredStateChanged.self)
+            .subscribe(on: RunLoop.main)
+            .filter { $0.isAnchored }
+            .filter { $0.anchor.name == Scene.AnchorCollection.signAnchorNameIdentifier }
+            .map { $0.anchor }
+            .sink { plantSignAnchorWrapper in
+                print("Anchor State Changed to isAnchored true. This means we have a new anchor")
+                // TODO ok unrelated actually I think when we re-load a new arView we need to move this thing over perhaps
+
+                // Get the previously loaded scene. This contains the notifications and the original entity which we've cloned
+                guard let scene = self.store.value.loadedPlantSignScene else {
+                    print("we must not have a scene yet")
+                    return
+                }
+
+                guard let originalSignEntity = scene.plantSignEntityToAttach else {
+                    print("This is the origina entity. use this as the key for the overrides")
+                    return
+                }
+                let notifications = scene.notifications
+                let overrides = [originalSignEntity.name: plantSignAnchorWrapper]
+                notifications.lookAtCamera.post(overrides: overrides)
+        }.store(in: &disposables)
+
+
+        arView.scene.publisher(for: SceneEvents.Update.self)
+            .throttle(for: .seconds(3), scheduler: RunLoop.main, latest: true)
+            .subscribe(on: RunLoop.main).sink { update in
+                print("\nupdate after a throttle \(update.deltaTime)")
+                guard let scene = self.store.value.loadedPlantSignScene else {
                     print("we must not have a scene yet")
                     return
                 }
@@ -54,44 +80,34 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
                     print("This is the origina entity. use this as the key for the overrides")
                     return
                 }
-                plantSignAnchorWrapper.children.filter { entity in
-                    return entity.name == "PlantSignEntityToAttach"
-                }.forEach { entity in
+                let notifications = scene.notifications
+                update
+                    .scene
+                    .anchors
+                    .filter { $0.name == Scene.AnchorCollection.signAnchorNameIdentifier }
+                    .compactMap { $0 as? AnchorEntity }
+                    .forEach({ plantSignAnchorWrapper in
 
-                    // get the plant sign's anchoring's targets's world transform to determine the distance from the camera
-                    guard case let AnchoringComponent.Target.world(transform) = plantSignAnchorWrapper.anchoring.target else {
-                        print("this anchor does not have a world based transform")
-                       return
-                    }
-                    let theDistance = distance(transform.columns.3, frame.camera.transform.columns.3)
-                    let notifications = scene.notifications
+                        guard case let AnchoringComponent.Target.world(transform) = plantSignAnchorWrapper.anchoring.target else {
+                                                           print("this anchor does not have a world based transform")
+                                                           return
+                                                       }
+                        let theDistance = distance(transform.columns.3, arView.cameraTransform.matrix.columns.3)
+                        print(" The current camera distance is: \(theDistance)")
 
-                    // ok actually the thing we want is not anchorWeAreCheckingForDistance, it's the child
-                    let overrides = [originalSignEntity.name: entity]
-                    //print("overrides \(overrides.keys)")
-                    if theDistance > 2 {
-                        print("send notification that we are more than 2 meters away. So like hide the extra stuff i guess")
-                        notifications.far.post(overrides: overrides)
-                    }
-                    if theDistance < 1 {
-                        // show it
-                        if !visibleSigns.contains(entity) {
-                            print("close, show it")
-                            visibleSigns.insert(entity)
-                            hiddenSigns.remove(entity)
-                            notifications.near.post(overrides: overrides)
+                        let overrides = [originalSignEntity.name: plantSignAnchorWrapper]
+                        if theDistance < 1 {
+                            print(" close, show it")
+//                             notifications.near.post(overrides: overrides)
+                        } else if theDistance > 2 {
+                            print(" far, hide it")
+//                             notifications.far.post(overrides: overrides)
                         }
-                    } else {
-                        if visibleSigns.contains(entity) {
-                            visibleSigns.remove(entity)
-                            hiddenSigns.insert(entity)
-                            print("far, hide it")
-                            notifications.far.post(overrides: overrides)
-                        }
-                    }
-                }
-        }
+                    })
+
+        }.store(in: &disposables)
     }
+    
 
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
         anchors
@@ -154,7 +170,11 @@ extension ARDelegate {
     func addAnchorFromARAnchor(arAnchor: ARAnchor, with remoteUUID: UUID) {
         // At this point we know that we have an ARAnchor object with no ARView (RealityKit) Anchor. This means that we
         // are getting this from the network and we need to render it in RealityKit.
-        guard let plantSignEntityToAttach = store.value.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
+        guard let originalSignEntityScene = store.value.loadedPlantSignScene else {
+            print("no plant sign scene has been loaded")
+            return
+        }
+        guard let plantSignEntityToAttach = originalSignEntityScene.plantSignEntityToAttach?.clone(recursive: true) else {
             print("No plantSignScene was loaded")
             return
         }
@@ -172,10 +192,12 @@ extension ARDelegate {
 
         plantSignEntityToAttach.name = selectedSpaceAnchor.title
         plantSignEntityToAttach.updatePlantSignName(name: selectedSpaceAnchor.title)
+
         // 4. Add the newly loaded plantSign to the anchor
         #if !targetEnvironment(simulator)
 
         let anchorEntity = AnchorEntity(anchor: arAnchor)
+        anchorEntity.name = Scene.AnchorCollection.signAnchorNameIdentifier
         anchorEntity.addChild(plantSignEntityToAttach)
         //                // 5. add an occlusion plane to the anchor for when the sign is down below
         //                anchorEntity.addOcclusionBox()
@@ -184,6 +206,11 @@ extension ARDelegate {
         //plantSignScene.plantSignAnchor?.updatePlantSignName(name: plantName ?? "Name should have come in on the anchor")
         print("// 7. From didAdd in the Delegate: add the anchor to the arView.")
         self.store.value.arView?.scene.anchors.append(anchorEntity)
+
+        let notifications = originalSignEntityScene.notifications
+        let overrides = [originalSignEntityScene.name: plantSignEntityToAttach]
+//        notifications.lookAtCamera.post(overrides: overrides)
+
         #endif
     }
 }
