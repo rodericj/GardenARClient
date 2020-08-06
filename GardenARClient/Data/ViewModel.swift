@@ -109,7 +109,13 @@ enum SpaceInfoFetch: Equatable {
 }
 
 struct ViewModel {
-    var arView: ARView?
+    var arView: ARView? {
+        didSet {
+            if #available(iOS 13.4, *) {
+                arView?.debugOptions = [.showStatistics, .showWorldOrigin, .showSceneUnderstanding, .showAnchorGeometry, .showAnchorGeometry, .showFeaturePoints]
+            } 
+        }
+    }
     var isShowingPlantInfo: Bool = false
     var isAddingSign: Bool = false
     var isShowingModalInfoCollectionFlow: Bool = true
