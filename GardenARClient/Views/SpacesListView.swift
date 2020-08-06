@@ -14,15 +14,25 @@ struct SpacesListView: View {
     var body: some View {
         NavigationView {
             ZStack {
+
                 List {
+                    NavigationLink(destination: TextInputView(alertType: TextInputType.createSpace("Add a new space"), completion: { newSpaceName in
+                        try? self.store.makeSpace(named: newSpaceName)
+                    }), label: {
+                        Text("New Space")
+                    })
                     ForEach(store.value.spaces.all) { space in
                         SpaceRow(spaceInfo: space, selected: self.$store.value.selectedSpace)
                     }.onDelete(perform: delete)
-                }.onAppear {
-                    self.store.getSpaces()
                 }
-                AddItemsButtons()
             }.navigationBarTitle(Text("Available Spaces"))
+                .navigationBarItems(trailing:
+                    Button(action: {
+                        self.store.getSpaces()
+                    }) {
+                        Image(systemName: "gobackward")
+                    }
+            )
         }
     }
 
@@ -35,8 +45,8 @@ struct SpacesListView: View {
 struct SpacesListView_Previews: PreviewProvider {
     static var previews: some View {
         var viewModel = ViewModel()
-        viewModel.spaces = .fetched([SpaceInfo(title: "banana", id: UUID()),
-                                     SpaceInfo(title: "some other space", id: UUID())])
+        viewModel.spaces = .fetched([SpaceInfo(title: "Banana", id: UUID()),
+                                     SpaceInfo(title: "Some other space", id: UUID())])
         let store = Store<ViewModel>(initialValue: viewModel, networkClient: NetworkClient())
         return SpacesListView().environmentObject(store)
     }

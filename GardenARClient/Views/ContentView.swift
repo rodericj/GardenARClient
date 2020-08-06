@@ -27,50 +27,31 @@ struct ContentView : View {
             ARViewContainer(sceneDelegate: sceneDelegate, store: store)
                 .edgesIgnoringSafeArea(.all)
             WithSelectedSpaceView()
-            // The alert view workaround. This could be it's own view in a popover. It's cleaner
-            containedView()
         }
         .popover(isPresented: $store.value.isShowingPlantInfo, attachmentAnchor: .point(.bottomTrailing), arrowEdge: .bottom) {
             PlantInfo()
         }
-        .popover(isPresented: $store.value.isShowingSpaceSelectionView, attachmentAnchor: .point(.top), arrowEdge: .top) {
-            if UIDevice.current.userInterfaceIdiom == .pad {
-                SpacesListView().environmentObject(self.store).frame(width: 300, height: 600)
-            } else {
+        .sheet(isPresented: $store.value.isShowingModalInfoCollectionFlow, onDismiss: {
+                self.store.checkModalState()
+        }, content: {
+            if self.store.value.showingAlert != .none {
+                TextInputView(alertType: self.store.value.showingAlert) { name in
+                    switch self.store.value.showingAlert {
+                    case .createSpace(_):
+                        try? self.store.makeSpace(named: name)
+                    case .createMarker(_, let arView, let raycastResult):
+                        self.addSign(named: name, at: raycastResult, on: arView)
+                    case .none:
+                        break
+                    }
+                }.environmentObject(self.store)
+            }
+                // Then we check if we have a selected space
+            else if self.store.value.selectedSpace == .none {
                 SpacesListView().environmentObject(self.store)
             }
-        }
-    }
-
-    func containedView() -> AnyView? {
-        switch store.value.showingAlert {
-
-        case .none:
-            return nil
-        case .createSpace(_):
-            return  AnyView(
-                ZStack {
-                    Rectangle()
-                        .fill(Color.black.opacity(0.4))
-                        .edgesIgnoringSafeArea(.all)
-                    AlertView(alertType: store.value.showingAlert, completion: { spaceName in
-                        print("the new space name \(spaceName)")
-                        try? self.store.makeSpace(named: spaceName)
-                    })
-                }
-            )
-        case .createMarker(_, let arView, let raycastResult):
-            return AnyView(
-                ZStack {
-                    Rectangle()
-                        .fill(Color.black.opacity(0.4))
-                        .edgesIgnoringSafeArea(.all)
-                    AlertView(alertType: store.value.showingAlert, completion: { plantName in
-                        print("the new plantName name \(plantName)")
-                        self.addSign(named: plantName, at: raycastResult, on: arView)
-                    })
-                }
-            )
+        }).onAppear {
+            self.store.getSpaces()
         }
     }
 }

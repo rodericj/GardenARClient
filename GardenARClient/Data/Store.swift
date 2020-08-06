@@ -20,6 +20,8 @@ final class Store<Value>: ObservableObject {
 enum SelectedSpaceAction {
     case selectSpace(SpaceInfo)
     case clearSpace
+    case createdSpace(SpaceInfo)
+
 }
 
 func spaceSelectionReducer( viewModel: inout ViewModel, action: SelectedSpaceAction) {
@@ -31,5 +33,9 @@ func spaceSelectionReducer( viewModel: inout ViewModel, action: SelectedSpaceAct
     case .clearSpace:
         viewModel.selectedSpace = .none
         break
+    case .createdSpace(let space):
+        var allSpaces = viewModel.spaces.all
+        allSpaces.append(space)
+        viewModel.spaces = .fetched(allSpaces)
     }
 }

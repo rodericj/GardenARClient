@@ -10,7 +10,7 @@ import SwiftUI
 import Combine
 import ARKit
 import RealityKit
-enum AlertType {
+enum TextInputType: Equatable {
 
     case none
     case createSpace(String)
@@ -30,76 +30,54 @@ enum AlertType {
     }
 }
 
-struct AlertView: View {
+struct TextInputView: View {
     @State var enteredText: String = ""
+    let alertType: TextInputType
     @EnvironmentObject var store: Store<ViewModel>
-    @State private var keyboardHeight: CGFloat = 0
-
-    let alertType: AlertType
+    @Environment(\.presentationMode) var presentationMode
     let completion: (String) -> ()
     var body: some View {
-        return VStack {
-            Spacer()
-            VStack {
-                Spacer().frame(width: 0, height: 20, alignment: .center)
-                Text(alertType.title).foregroundColor(.accentColor)
+        VStack {
+            Spacer().frame(width: 0, height: 20, alignment: .center)
+            Text(alertType.title)//.foregroundColor(.accentColor)
 
-                TextField("Backyard", text: $enteredText)
-                    .foregroundColor(.primary).colorInvert()
-                    .frame(idealWidth: 200,
-                           maxWidth: 250,
-                           idealHeight: 200,
-                           alignment: .center)
-                    .padding(5)
-                    .background(Color.secondary)
-                    .border(Color.primary)
-                    .padding(10)
-                HStack {
-                    Button(action: {
-                        self.store.value.showingAlert = .none
-                    }) {
-                        Text("Cancel")
-                            .padding()
-                            .frame(width: 100, height: nil, alignment: .center)
-                            .background(Color.secondary)
-                            .foregroundColor(.red)
-                            .cornerRadius(5)
-                    }.padding(10)
-                    Button(action: {
-                        self.completion(self.enteredText)
-                        self.store.value.showingAlert = .none
-                    }) {
-                        Text("Ok")
-                            .padding()
-                            .frame(width: 100, height: nil, alignment: .center)
-                            .background(Color.secondary)
-                            .cornerRadius(5)
-                    }.padding(10)
-                    Spacer().frame(width: 0, height: 20, alignment: .center)
-                }
+            TextField("Backyard", text: $enteredText)
+                .foregroundColor(.primary)
+                .padding(5)
+                .border(Color.primary)
+                .padding(10)
+            HStack {
+                Button(action: {
+                    self.store.value.isShowingModalInfoCollectionFlow = false // TODO use a reducer here
+                }) {
+                    Text("Cancel")
+                        .padding()
+                        .frame(width: 100, height: nil, alignment: .center)
+                        .background(Color.primary).colorInvert()
+                        .foregroundColor(.red)
+                        .cornerRadius(5)
+                }.padding(10)
+                Button(action: {
+                    self.completion(self.enteredText)
+                }) {
+                    Text("Ok")
+                        .padding()
+                        .frame(width: 100, height: nil, alignment: .center)
+                        .background(Color.primary).colorInvert()
+                        .cornerRadius(5)
+                }.padding(10)
             }
-            .padding(10)
-            .background(Color.primary)
-            .cornerRadius(10)
-            .shadow(radius: 10)
-            .padding(.bottom, keyboardHeight)
-                       .onReceive(Publishers.keyboardHeight) { self.keyboardHeight = $0 }
             Spacer()
         }
     }
+
 }
 
-extension AlertView {
-    func postSpace() {
-
-    }
-    
-}
 struct AlertView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            AlertView(alertType: .createMarker("Enter new Space Name", ARView(), nil), completion: { _ in }).environment(\.colorScheme, .light)
-            AlertView(alertType: .createMarker("Enter new Space Name", ARView(),  nil), completion: { _ in }).environment(\.colorScheme, .dark)
+            TextInputView(alertType: .createMarker("Enter new name: Light Mode", ARView(), nil), completion: { _ in }).environment(\.colorScheme, .light).background(Color.white)
+            TextInputView(alertType: .createMarker("Enter new Space Name: Dark Mode", ARView(), nil), completion: { _ in }).environment(\.colorScheme, .dark).background(Color.black)
         }
     }
 }

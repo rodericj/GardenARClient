@@ -75,7 +75,11 @@ enum SelectedSpaceInfoIsSet: Equatable {
     }
 }
 
-enum SpaceInfoFetch {
+enum SpaceInfoFetch: Equatable {
+    static func == (lhs: SpaceInfoFetch, rhs: SpaceInfoFetch) -> Bool {
+        return lhs.all == rhs.all
+    }
+
     case fetching
     case fetched([SpaceInfo])
     case failed(Error)
@@ -108,27 +112,28 @@ struct ViewModel {
     var arView: ARView?
     var isShowingPlantInfo: Bool = false
     var isAddingSign: Bool = false
-    var isShowingSpaceSelectionView: Bool = true
+    var isShowingModalInfoCollectionFlow: Bool = true
+    
     var shouldShowAddSignButton: Bool {
         get {
-            selectedSpace != .none && !isShowingPlantInfo && !isShowingSpaceSelectionView
+            selectedSpace != .none && !isShowingPlantInfo && !isShowingModalInfoCollectionFlow
         }
     }
-    var showingAlert: AlertType = .none
+    var isShowingModal: Bool = false
+    var showingAlert: TextInputType = .none
     var spaces: SpaceInfoFetch = .fetching {
         didSet {
-            isShowingSpaceSelectionView = selectedSpace == .none
-            print("spaces \(spaces)")
+            if selectedSpace == .none {
+                isShowingModalInfoCollectionFlow = true
+            }
         }
     }
     var selectedSpace: SelectedSpaceInfoIsSet = .none {
         didSet {
             if oldValue != selectedSpace {
-                gotSelectedSpace()
+                loadFetchedWorldConfiguration()
             }
-            if selectedSpace == .none {
-                isShowingSpaceSelectionView = true
-            }
+            isShowingModalInfoCollectionFlow = selectedSpace == .none
         }
     }
 
@@ -136,7 +141,7 @@ struct ViewModel {
 
     var pendingAnchorEntityLookup: [ARAnchor : (anchorEntity: AnchorEntity, plantName: String)] = [:]
 
-    private func gotSelectedSpace() {
+    private func loadFetchedWorldConfiguration() {
         print("🌎 We updated our selected space. Let's consider updating the arView's world configuration")
         guard case SelectedSpaceInfoIsSet.space(let spaceInfo) = selectedSpace else {
             return

@@ -27,7 +27,7 @@ struct WithSelectedSpaceView: View {
                             .cornerRadius(40)
                             .shadow(radius: 10)
                         Button(action: {
-                            self.store.value.isAddingSign = false
+                            self.store.value.isAddingSign = false // TODO use a reducer here
                         }) {
                             Text("Cancel")
                                 .font(.body)
@@ -44,6 +44,7 @@ struct WithSelectedSpaceView: View {
             }
             VStack {
                 Button(action: {
+                    self.store.value.isAddingSign = false // TODO use a reducer here
                     self.store.value.selectedSpace = .none
                 }) {
                     if self.store.value.selectedSpace != .none {

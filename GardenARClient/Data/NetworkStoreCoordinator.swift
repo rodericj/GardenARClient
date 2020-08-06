@@ -10,6 +10,11 @@ import Foundation
 import Combine
 
 extension Store where Value == ViewModel {
+
+    func checkModalState() {
+        value.isShowingModalInfoCollectionFlow = (value.showingAlert != TextInputType.none) || (value.selectedSpace == .none)
+    }
+
     func appendSpace(spaceInfo: SpaceInfo) {
         switch value.spaces {
 
@@ -121,7 +126,7 @@ extension Store where Value == ViewModel {
                 case .fetched(let fetchedSpaces):
                     var copy = fetchedSpaces
                     copy.append(newSpaceInfo)
-                    self.value.spaces = .fetched(copy)
+                    spaceSelectionReducer(viewModel: &self.value, action: .createdSpace(newSpaceInfo))
                 case .failed(let error):
                     print("error making a space \(error)")
                 }

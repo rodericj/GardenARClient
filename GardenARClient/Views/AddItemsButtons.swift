@@ -67,20 +67,21 @@ extension UIView {
 
 struct AddItemsButtons: View {
     @EnvironmentObject var store: Store<ViewModel>
+    @Environment(\.presentationMode) var presentationMode
     var body: some View {
         VStack {
             Spacer()
             HStack {
                 if store.value.selectedSpace == .none {
                     Button(action: {
-                        self.store.value.showingAlert = .createSpace("Add a new Space")
+                        self.store.value.showingAlert = .createSpace("Add a new Space") // TODO use a reducer here
                     }) {
                         CTAButtonView(title: "+ Space")
                     }
                 }
                 if store.value.shouldShowAddSignButton {
                     Button(action: {
-                        self.store.value.isAddingSign = true
+                        self.store.value.isAddingSign = true // TODO use a reducer here
                     }) {
                         CTAButtonView(title: "+ Sign")
                     }

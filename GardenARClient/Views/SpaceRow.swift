@@ -12,12 +12,14 @@ struct SpaceRow: View {
     let spaceInfo: SpaceInfo
     @Binding var selected: SelectedSpaceInfoIsSet
     @EnvironmentObject var store: Store<ViewModel>
+    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         Button(action: {
             print("🌎 Select space \(self.spaceInfo.title)")
             self.store.get(space: self.spaceInfo)
             self.selected = .space(self.spaceInfo)
+            self.presentationMode.wrappedValue.dismiss()
         }) {
             VStack(alignment: .leading) {
                 Text(spaceInfo.title).font(.largeTitle).autocapitalization(.words)
