@@ -33,7 +33,6 @@ enum TextInputType: Equatable {
 struct TextInputView: View {
     @State var enteredText: String = ""
     let alertType: TextInputType
-    @EnvironmentObject var store: Store<ViewModel>
     @Environment(\.presentationMode) var presentationMode
     let completion: (String) -> ()
     var body: some View {
