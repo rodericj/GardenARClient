@@ -42,18 +42,19 @@ struct WithSelectedSpaceView: View {
             } else if store.value.selectedSpace != .none {
                 AddItemsButtons()
             }
-            VStack {
-                Button(action: {
-                    self.store.value.isAddingSign = false // TODO use a reducer here
-                    self.store.value.selectedSpace = .none
-                }) {
-                    if self.store.value.selectedSpace != .none {
-                        CTAButtonView(title: store.value.selectedSpace.title)
+            if !store.value.isAddingSign {
+                VStack {
+                    Button(action: {
+                        self.store.value.isAddingSign = false // TODO use a reducer here
+                        self.store.value.selectedSpace = .none
+                    }) {
+                        if self.store.value.selectedSpace != .none {
+                            CTAButtonView(title: store.value.selectedSpace.title)
+                        }
                     }
+                    Spacer()
                 }
-                Spacer()
             }
-
         }
     }
 }
