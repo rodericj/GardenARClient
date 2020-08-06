@@ -245,30 +245,13 @@ extension ARDelegate {
 
     private func checkForCollisions(at touchLocation: CGPoint, on arView: ARView) {
         let hits = arView.hitTest(touchLocation)
-        guard let scene = store.value.loadedPlantSignScene else {
-            print("we must not have a scene yet")
-            return
-        }
-
-        guard let originalSignEntity = scene.plantSignEntityToAttach else {
-            print("This is the origina entity. use this as the key for the overrides")
-            return
-        }
-        hits.map {
-            $0.entity.findRoot()
-        }
-        .map { entity -> Entity? in
-            let found = entity.findEntity(named: "PlantSignEntityToAttach")
-            return found
-        }
-        .compactMap { optinalEntity in
-            return optinalEntity
-        }
-        .forEach { entity in
-            let overrides = [originalSignEntity.name: entity]
-            let notifications = scene.notifications
-            notifications.parsedTap.post(overrides: overrides)
-            store.value.isShowingPlantInfo = true
+        hits.map { $0.entity.findRoot() }
+            .map { $0.findEntity(named: "PlantSignEntityToAttach") }
+            .compactMap { $0 }
+            .forEach { entity in
+                print("we have tapped on \(entity.anchor?.anchorIdentifier)")
+                store.value.isShowingPlantInfo = true
+                store.value.isShowingModalInfoCollectionFlow = true
         }
     }
 
