@@ -48,16 +48,6 @@ struct TextInputView: View {
                 .padding(10)
             HStack {
                 Button(action: {
-                    self.store.value.isShowingModalInfoCollectionFlow = false // TODO use a reducer here
-                }) {
-                    Text("Cancel")
-                        .padding()
-                        .frame(width: 100, height: nil, alignment: .center)
-                        .background(Color.primary).colorInvert()
-                        .foregroundColor(.red)
-                        .cornerRadius(5)
-                }.padding(10)
-                Button(action: {
                     self.completion(self.enteredText)
                 }) {
                     Text("Ok")
