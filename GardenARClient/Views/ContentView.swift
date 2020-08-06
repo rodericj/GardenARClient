@@ -40,6 +40,8 @@ struct ContentView : View {
                     case .createSpace(_):
                         try? self.store.makeSpace(named: name)
                     case .createMarker(_, let arView, let raycastResult):
+                        self.store.value.isShowingModalInfoCollectionFlow = false
+                        self.store.value.showingAlert = .none
                         self.addSign(named: name, at: raycastResult, on: arView)
                     case .none:
                         break
@@ -49,6 +51,8 @@ struct ContentView : View {
                 // Then we check if we have a selected space
             else if self.store.value.selectedSpace == .none {
                 SpacesListView().environmentObject(self.store)
+            } else {
+                Text("this isn't supposed to be like this")
             }
         }).onAppear {
             self.store.getSpaces()

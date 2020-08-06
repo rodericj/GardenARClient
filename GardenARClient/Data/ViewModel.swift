@@ -120,7 +120,13 @@ struct ViewModel {
         }
     }
     var isShowingModal: Bool = false
-    var showingAlert: TextInputType = .none
+    var showingAlert: TextInputType = .none {
+        didSet {
+            if showingAlert != oldValue && showingAlert != .none {
+                isShowingModalInfoCollectionFlow = true
+            }
+        }
+    }
     var spaces: SpaceInfoFetch = .fetching {
         didSet {
             if selectedSpace == .none {
