@@ -20,16 +20,11 @@ extension Scene.AnchorCollection {
     static let signAnchorNameIdentifier = "AnchorEntity For A Plant Sign"
 }
 
-class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDelegate {
-    func updateWithEntity(entity: HasAnchoring) {
-        store.value.arView?.scene.addAnchor(entity)
-    }
-
+class ARDelegate: NSObject, ARSessionDelegate, ARSCNViewDelegate {
     var visibleSigns = Set<Entity>()
     var hiddenSigns = Set<Entity>()
     static let unnamedAnchorName = "NewUnnamedAnchor"
     let store: Store<ViewModel>
-    private var disposables = Set<AnyCancellable>()
 
     let networkClient: NetworkClient
     init(store: Store<ViewModel>, networkClient: NetworkClient) {
@@ -38,75 +33,62 @@ class ARDelegate: NSObject, ARSessionDelegate, HasOptionalARView, ARSCNViewDeleg
 
     }
 
-    func setupObservers(arView: ARView) {
-
-        // When an anchor is added, we need to trigger the lookAtCamera notification which is set to repeat
-        arView.scene.publisher(for: SceneEvents.AnchoredStateChanged.self)
-            .subscribe(on: RunLoop.main)
-            .filter { $0.isAnchored }
-            .filter { $0.anchor.name == Scene.AnchorCollection.signAnchorNameIdentifier }
-            .map { $0.anchor }
-            .sink { plantSignAnchorWrapper in
-                print("Anchor State Changed to isAnchored true. This means we have a new anchor")
-                // TODO ok unrelated actually I think when we re-load a new arView we need to move this thing over perhaps
-
-                // Get the previously loaded scene. This contains the notifications and the original entity which we've cloned
-                guard let scene = self.store.value.loadedPlantSignScene else {
-                    print("we must not have a scene yet")
-                    return
-                }
-
-                guard let originalSignEntity = scene.plantSignEntityToAttach else {
-                    print("This is the origina entity. use this as the key for the overrides")
-                    return
-                }
-                let notifications = scene.notifications
-                let overrides = [originalSignEntity.name: plantSignAnchorWrapper]
-                notifications.lookAtCamera.post(overrides: overrides)
-        }.store(in: &disposables)
-
-
-        arView.scene.publisher(for: SceneEvents.Update.self)
-            .throttle(for: .seconds(3), scheduler: RunLoop.main, latest: true)
-            .subscribe(on: RunLoop.main).sink { update in
-                print("\nupdate after a throttle \(update.deltaTime)")
-                guard let scene = self.store.value.loadedPlantSignScene else {
-                    print("we must not have a scene yet")
-                    return
-                }
-
-                // TODO get PlantSignExtraTop, PlantSignExtraMiddle, PlantSignExtraBottom
-                guard let originalSignEntity = scene.plantSignEntityToAttach else {
-                    print("This is the origina entity. use this as the key for the overrides")
-                    return
-                }
-                let notifications = scene.notifications
-                update
-                    .scene
-                    .anchors
-                    .filter { $0.name == Scene.AnchorCollection.signAnchorNameIdentifier }
-                    .compactMap { $0 as? AnchorEntity }
-                    .forEach({ plantSignAnchorWrapper in
-
-                        guard case let AnchoringComponent.Target.world(transform) = plantSignAnchorWrapper.anchoring.target else {
-                                                           print("this anchor does not have a world based transform")
-                                                           return
-                                                       }
-                        let theDistance = distance(transform.columns.3, arView.cameraTransform.matrix.columns.3)
-                        print(" The current camera distance is: \(theDistance)")
-
-                        let overrides = [originalSignEntity.name: plantSignAnchorWrapper]
-                        if theDistance < 1 {
-                            print(" close, show it")
-//                             notifications.near.post(overrides: overrides)
-                        } else if theDistance > 2 {
-                            print(" far, hide it")
-//                             notifications.far.post(overrides: overrides)
-                        }
-                    })
-
-        }.store(in: &disposables)
+    func loadScene() {
+        // TODO in the effort to move the ARView out of the model, I think we need to make this not async. Let's see how it goes.
+        PlantSigns.loadSignSceneAsync { result in
+            switch result {
+            // this plantEntity holds is the entity we will add to the AnchorEntity
+            case .success(let plantSignScene):
+                self.store.value.loadedPlantSignScene = plantSignScene
+                self.store.value.arView?.scene.addAnchor(plantSignScene)
+            case .failure(let fetchModelError):
+                fatalError("🔴 Error loading plant signs async: \(fetchModelError)")
+            }
+        }
     }
+}
+extension ARViewContainer: ARSessionDelegate {
+//        arView.scene.publisher(for: SceneEvents.Update.self)
+//            .throttle(for: .seconds(3), scheduler: RunLoop.main, latest: true)
+//            .subscribe(on: RunLoop.main).sink { update in
+//                print("\nupdate after a throttle \(update.deltaTime)")
+//                guard let scene = self.store.value.loadedPlantSignScene else {
+//                    print("we must not have a scene yet")
+//                    return
+//                }
+//
+//                // TODO get PlantSignExtraTop, PlantSignExtraMiddle, PlantSignExtraBottom
+//                guard let originalSignEntity = scene.plantSignEntityToAttach else {
+//                    print("This is the origina entity. use this as the key for the overrides")
+//                    return
+//                }
+////                let notifications = scene.notifications
+//                update
+//                    .scene
+//                    .anchors
+//                    .filter { $0.name == Scene.AnchorCollection.signAnchorNameIdentifier }
+//                    .compactMap { $0 as? AnchorEntity }
+//                    .forEach({ plantSignAnchorWrapper in
+//
+//                        guard case let AnchoringComponent.Target.world(transform) = plantSignAnchorWrapper.anchoring.target else {
+//                                                           print("this anchor does not have a world based transform")
+//                                                           return
+//                                                       }
+//                        let theDistance = distance(transform.columns.3, arView.cameraTransform.matrix.columns.3)
+//                        print(" The current camera distance is: \(theDistance)")
+//
+//                        let overrides = [originalSignEntity.name: plantSignAnchorWrapper]
+//                        if theDistance < 1 {
+//                            print(" close, show it")
+////                             notifications.near.post(overrides: overrides)
+//                        } else if theDistance > 2 {
+//                            print(" far, hide it")
+////                             notifications.far.post(overrides: overrides)
+//                        }
+//                    })
+//
+//        }.store(in: &disposables)
+//    }
     
 
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
@@ -140,7 +122,7 @@ extension Entity {
 }
 
 // ARKit to RealityKit helpers
-extension ARDelegate {
+extension ARViewContainer {
     func sendAnchorToServer(arAnchor: ARAnchor, with remoteUUID: UUID, anchorEntity: AnchorEntity, plantName: String) {
 
         // 8. Need to get the world map then verify that this new thing is on there.
@@ -213,66 +195,6 @@ extension ARDelegate {
 
         #endif
     }
-}
-// Tap things
-extension ARDelegate {
-    func tapGestureSetup() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tappedOnARView))
-        assert(store.value.arView != nil)
-        store.value.arView?.addGestureRecognizer(tapGesture)
-    }
-
-    /// Tap gesture input handler.
-    /// - Tag: TapHandler
-    @objc
-    func tappedOnARView(_ sender: UITapGestureRecognizer) {
-        addNewAnchor(sender)
-    }
-
-    private func addSign(at touchLocation: CGPoint, on arView: ARView) {
-        // Cast a ray to check for its intersection with any planes.
-        #if !targetEnvironment(simulator)
-
-        let raycastResultsArray = arView.raycast(from: touchLocation, allowing: .estimatedPlane, alignment: .any)
-        guard let raycastResult = raycastResultsArray.first else {
-            // TODO messageLabel.displayMessage("No surface detected, try getting closer.", duration: 2.0)
-            print("No surface detected, try getting closer.")
-            return
-        }
-        store.value.showingAlert = .createMarker("Name this plant", arView, raycastResult)
-        #endif
-    }
-
-    private func checkForCollisions(at touchLocation: CGPoint, on arView: ARView) {
-        let hits = arView.hitTest(touchLocation)
-        hits.map { $0.entity.findRoot() }
-            .map { $0.findEntity(named: "PlantSignEntityToAttach") }
-            .compactMap { $0 }
-            .forEach { entity in
-                print("we have tapped on \(entity.anchor?.anchorIdentifier)")
-                store.value.isShowingPlantInfo = true
-                store.value.isShowingModalInfoCollectionFlow = true
-        }
-    }
-
-    fileprivate func addNewAnchor(_ sender: UITapGestureRecognizer) {
-        // Get the user's tap screen location.
-        guard let arView = store.value.arView else {
-            return
-        }
-        let touchLocation = sender.location(in: arView)
-
-        // do nothing if we are in the adding sign state
-        guard !store.value.isAddingSign else {
-            addSign(at: touchLocation, on: arView)
-            return
-        }
-
-       checkForCollisions(at: touchLocation, on: arView)
-    }
-}
-// private funcs
-extension ARDelegate {
 
     /**
      *  Save the map to a data representation, send it to the view model
@@ -302,20 +224,20 @@ extension ARDelegate {
         }
         print("ViewModel:AddAnchor We have a space selected, so send the anchor \(anchorID) \(anchorName) to the network client")
         var cancellable: AnyCancellable?
-        cancellable = try networkClient.update(space: currentSelectedSpace,
-                                               anchorID: anchorID,
-                                               anchorName: anchorName,
-                                               worldMapData: worldData).sink(receiveCompletion: { error in
+        cancellable = try store.update(space: currentSelectedSpace,
+                                       anchorID: anchorID,
+                                       anchorName: anchorName,
+                                       worldMapData: worldData).sink(receiveCompletion: { error in
 
-                                               }, receiveValue: { anchor in
-                                                print("ViewModel:AddAnchor just saved this anchor \(anchor) with id: \(anchor.id?.uuidString ?? "No ID set for this anchor")")
-                                                guard case var SelectedSpaceInfoIsSet.space(currentSelectedSpace) = self.store.value.selectedSpace else {
-                                                    print("we have no selected space")
-                                                    return
-                                                }
-                                                currentSelectedSpace.anchors?.append(anchor)
-                                                cancellable?.cancel()
-                                               })
+                                       }, receiveValue: { anchor in
+                                        print("ViewModel:AddAnchor just saved this anchor \(anchor) with id: \(anchor.id?.uuidString ?? "No ID set for this anchor")")
+                                        guard case var SelectedSpaceInfoIsSet.space(currentSelectedSpace) = self.store.value.selectedSpace else {
+                                            print("we have no selected space")
+                                            return
+                                        }
+                                        currentSelectedSpace.anchors?.append(anchor)
+                                        cancellable?.cancel()
+                                       })
     }
 }
 
@@ -344,17 +266,4 @@ extension Entity {
           occlusionPlane.position.y = -boxSize / 2
           addChild(occlusionPlane)
       }
-}
-
-extension SCNVector3 {
-    static func distanceFrom(vector vector1: SCNVector3, toVector vector2: SCNVector3) -> Float {
-        let x0 = vector1.x
-        let x1 = vector2.x
-        let y0 = vector1.y
-        let y1 = vector2.y
-        let z0 = vector1.z
-        let z1 = vector2.z
-
-        return sqrtf(powf(x1-x0, 2) + powf(y1-y0, 2) + powf(z1-z0, 2))
-    }
 }

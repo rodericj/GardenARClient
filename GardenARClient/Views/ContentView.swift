@@ -11,18 +11,10 @@ import SwiftUI
 import RealityKit
 import Combine
 
-// This may not be necessary anymore now that view model has the arview
-protocol HasOptionalARView {
-    func tapGestureSetup()
-    func updateWithEntity(entity: HasAnchoring)
-    func setupObservers(arView: ARView)
-}
-
-
 struct ContentView : View {
 
     @EnvironmentObject var store: Store<ViewModel>
-    let sceneDelegate: ARSessionDelegate & HasOptionalARView
+    let sceneDelegate: ARSessionDelegate // TODO We may be able to get rid of this
     let arViewContainer: ARViewContainer
     var body: some View {
         ZStack {
@@ -110,45 +102,21 @@ extension ContentView {
         // Set us back to the not isAddingSign state
         store.value.isAddingSign = false
 
-        let notifications = originalSignEntityScene.notifications
-        let overrides = [originalSignEntityScene.name: clonedPlantSign]
+//        let notifications = originalSignEntityScene.notifications
+//        let overrides = [originalSignEntityScene.name: clonedPlantSign]
 //        notifications.lookAtCamera.post(overrides: overrides)
 
     }
-
-    func addAnchor(anchorName: String, anchorID: UUID, worldData: Data) throws {
-        guard case let SelectedSpaceInfoIsSet.space(currentSelectedSpace) = store.value.selectedSpace else {
-            print("we have no selected space")
-            throw ViewModelError.noSpaceSelected
-        }
-        print("ViewModel:AddAnchor We have a space selected, so send the anchor \(anchorID) \(anchorName) to the network client")
-        var cancellable: AnyCancellable?
-        cancellable = try store.update(space: currentSelectedSpace,
-                                       anchorID: anchorID,
-                                       anchorName: anchorName,
-                                       worldMapData: worldData).sink(receiveCompletion: { error in
-
-                                       }, receiveValue: { anchor in
-                                        print("ViewModel:AddAnchor just saved this anchor \(anchor) with id: \(anchor.id?.uuidString ?? "No ID set for this anchor")")
-                                        guard case var SelectedSpaceInfoIsSet.space(currentSelectedSpace) = self.store.value.selectedSpace else {
-                                            print("we have no selected space")
-                                            return
-                                        }
-                                        currentSelectedSpace.anchors?.append(anchor)
-                                        cancellable?.cancel()
-                                       })
-    }
-
-
 }
-final class ARViewContainer: UIViewRepresentable {
+final class ARViewContainer: NSObject, UIViewRepresentable {
     let store: Store<ViewModel>
-    let sceneDelegate: ARSessionDelegate & HasOptionalARView
+    let sceneDelegate: ARSessionDelegate
     var sceneObserver: Cancellable!
     var anchorStateChangeObserver: Cancellable!
     let arView = ARView(frame: .zero)
+    private var disposables = Set<AnyCancellable>()
 
-    init(sceneDelegate: ARSessionDelegate & HasOptionalARView, store: Store<ViewModel>) {
+    init(sceneDelegate: ARSessionDelegate, store: Store<ViewModel>) {
         self.sceneDelegate = sceneDelegate
         self.store = store
         self.store.value.arView = arView
@@ -156,17 +124,102 @@ final class ARViewContainer: UIViewRepresentable {
 
     func makeUIView(context: Context) -> ARView {
         #if !targetEnvironment(simulator)
-        arView.session.delegate = sceneDelegate
-        sceneDelegate.tapGestureSetup()
-        sceneDelegate.setupObservers(arView: arView)
+        arView.session.delegate = self
+        tapGestureSetup()
+        setupObservers(arView: arView)
         #endif
-//        arView.addCoaching()
+        arView.addCoaching()
         return arView
     }
 
+    static func dismantleUIView(_ uiView: ARView, coordinator: ()) {
+        print("We've been asked to dismantle our arView")
+    }
     // MARK: - Gesture recognizer callbacks
-
     func updateUIView(_ uiView: ARView, context: Context) {}
+
+    func setupObservers(arView: ARView) {
+
+        // When an anchor is added, we need to trigger the lookAtCamera notification which is set to repeat
+        arView.scene.publisher(for: SceneEvents.AnchoredStateChanged.self)
+            .subscribe(on: RunLoop.main)
+            .filter { $0.isAnchored }
+            .filter { $0.anchor.name == Scene.AnchorCollection.signAnchorNameIdentifier }
+            .map { $0.anchor }
+            .sink { plantSignAnchorWrapper in
+                print("Anchor State Changed to isAnchored true. This means we have a new anchor")
+                // TODO ok unrelated actually I think when we re-load a new arView we need to move this thing over perhaps
+
+                // Get the previously loaded scene. This contains the notifications and the original entity which we've cloned
+                guard let scene = self.store.value.loadedPlantSignScene else {
+                    print("we must not have a scene yet")
+                    return
+                }
+
+                guard let originalSignEntity = scene.plantSignEntityToAttach else {
+                    print("This is the origina entity. use this as the key for the overrides")
+                    return
+                }
+                let notifications = scene.notifications
+                let overrides = [originalSignEntity.name: plantSignAnchorWrapper]
+                notifications.lookAtCamera.post(overrides: overrides)
+        }.store(in: &disposables)
+    }
+
+    fileprivate func addNewAnchor(_ sender: UITapGestureRecognizer) {
+           // Get the user's tap screen location.
+           guard let arView = store.value.arView else {
+               return
+           }
+           let touchLocation = sender.location(in: arView)
+
+           // do nothing if we are in the adding sign state
+           guard !store.value.isAddingSign else {
+               addSign(at: touchLocation, on: arView)
+               return
+           }
+
+          checkForCollisions(at: touchLocation, on: arView)
+       }
+    
+    func tapGestureSetup() {
+           let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tappedOnARView))
+           assert(store.value.arView != nil)
+           store.value.arView?.addGestureRecognizer(tapGesture)
+       }
+
+       /// Tap gesture input handler.
+       /// - Tag: TapHandler
+       @objc
+       func tappedOnARView(_ sender: UITapGestureRecognizer) {
+           addNewAnchor(sender)
+       }
+
+       private func addSign(at touchLocation: CGPoint, on arView: ARView) {
+           // Cast a ray to check for its intersection with any planes.
+           #if !targetEnvironment(simulator)
+
+           let raycastResultsArray = arView.raycast(from: touchLocation, allowing: .estimatedPlane, alignment: .any)
+           guard let raycastResult = raycastResultsArray.first else {
+               // TODO messageLabel.displayMessage("No surface detected, try getting closer.", duration: 2.0)
+               print("No surface detected, try getting closer.")
+               return
+           }
+           store.value.showingAlert = .createMarker("Name this plant", arView, raycastResult)
+           #endif
+       }
+
+       private func checkForCollisions(at touchLocation: CGPoint, on arView: ARView) {
+           let hits = arView.hitTest(touchLocation)
+           hits.map { $0.entity.findRoot() }
+               .map { $0.findEntity(named: "PlantSignEntityToAttach") }
+               .compactMap { $0 }
+               .forEach { entity in
+                   print("we have tapped on \(entity.anchor?.anchorIdentifier)")
+                   store.value.isShowingPlantInfo = true
+                   store.value.isShowingModalInfoCollectionFlow = true
+           }
+       }
 }
 extension ARView: ARCoachingOverlayViewDelegate {
     func addCoaching() {
@@ -189,7 +242,7 @@ extension ARView: ARCoachingOverlayViewDelegate {
 }
 
 #if DEBUG
-class TestARSession: NSObject, ARSessionDelegate, HasOptionalARView {
+class TestARSession: NSObject, ARSessionDelegate {
     func setupObservers(arView: ARView) {
 
     }
@@ -199,16 +252,7 @@ class TestARSession: NSObject, ARSessionDelegate, HasOptionalARView {
 }
 struct ContentView_Previews : PreviewProvider {
 
-    private class DummyDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
-        func tapGestureSetup() {
-
-        }
-
-        func setupObservers(arView: ARView) {
-
-        }
-
-
+    private class DummyDelegate: NSObject, ARSessionDelegate {
     }
     static var previews: some View {
 

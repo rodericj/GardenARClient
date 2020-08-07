@@ -25,22 +25,6 @@ enum AlertModel: Equatable {
     case showing(String)
 }
 
-extension ARDelegate {
-
-    func loadScene() {
-        PlantSigns.loadSignSceneAsync { result in
-            switch result {
-            // this plantEntity holds is the entity we will add to the AnchorEntity
-            case .success(let plantSignScene):
-                self.store.value.loadedPlantSignScene = plantSignScene
-                self.store.value.arView?.scene.addAnchor(plantSignScene)
-            case .failure(let fetchModelError):
-                fatalError("🔴 Error loading plant signs async: \(fetchModelError)")
-            }
-        }
-    }
-}
-
 class PlantSignCollisionEntity: Entity, HasCollision {
     var cancellable: Cancellable?
 
@@ -113,7 +97,7 @@ struct ViewModel {
         didSet {
             if #available(iOS 13.4, *) {
                 arView?.debugOptions = [.showStatistics, .showWorldOrigin, .showSceneUnderstanding, .showAnchorGeometry, .showAnchorGeometry, .showFeaturePoints]
-            } 
+            }
         }
     }
     var isShowingPlantInfo: Bool = false
@@ -140,6 +124,7 @@ struct ViewModel {
             }
         }
     }
+
     var selectedSpace: SelectedSpaceInfoIsSet = .none {
         didSet {
             if oldValue != selectedSpace {
