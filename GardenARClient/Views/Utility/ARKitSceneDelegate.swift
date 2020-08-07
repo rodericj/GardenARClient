@@ -48,49 +48,6 @@ class ARDelegate: NSObject, ARSessionDelegate, ARSCNViewDelegate {
     }
 }
 extension ARViewContainer: ARSessionDelegate {
-//        arView.scene.publisher(for: SceneEvents.Update.self)
-//            .throttle(for: .seconds(3), scheduler: RunLoop.main, latest: true)
-//            .subscribe(on: RunLoop.main).sink { update in
-//                print("\nupdate after a throttle \(update.deltaTime)")
-//                guard let scene = self.store.value.loadedPlantSignScene else {
-//                    print("we must not have a scene yet")
-//                    return
-//                }
-//
-//                // TODO get PlantSignExtraTop, PlantSignExtraMiddle, PlantSignExtraBottom
-//                guard let originalSignEntity = scene.plantSignEntityToAttach else {
-//                    print("This is the origina entity. use this as the key for the overrides")
-//                    return
-//                }
-////                let notifications = scene.notifications
-//                update
-//                    .scene
-//                    .anchors
-//                    .filter { $0.name == Scene.AnchorCollection.signAnchorNameIdentifier }
-//                    .compactMap { $0 as? AnchorEntity }
-//                    .forEach({ plantSignAnchorWrapper in
-//
-//                        guard case let AnchoringComponent.Target.world(transform) = plantSignAnchorWrapper.anchoring.target else {
-//                                                           print("this anchor does not have a world based transform")
-//                                                           return
-//                                                       }
-//                        let theDistance = distance(transform.columns.3, arView.cameraTransform.matrix.columns.3)
-//                        print(" The current camera distance is: \(theDistance)")
-//
-//                        let overrides = [originalSignEntity.name: plantSignAnchorWrapper]
-//                        if theDistance < 1 {
-//                            print(" close, show it")
-////                             notifications.near.post(overrides: overrides)
-//                        } else if theDistance > 2 {
-//                            print(" far, hide it")
-////                             notifications.far.post(overrides: overrides)
-//                        }
-//                    })
-//
-//        }.store(in: &disposables)
-//    }
-    
-
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
         anchors
             .filter { $0.name?.hasPrefix("RemoteUUID-") ?? false }
