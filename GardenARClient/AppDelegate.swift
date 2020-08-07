@@ -14,18 +14,20 @@ import Combine
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    let networkClient = NetworkClient()
-    lazy var viewModel = ViewModel()
-    lazy var store = Store<ViewModel>(initialValue: viewModel, networkClient: networkClient)
+    private let networkClient = NetworkClient()
+    private lazy var viewModel = ViewModel()
+    private lazy var store = Store<ViewModel>(initialValue: viewModel, networkClient: networkClient)
     private var disposables = Set<AnyCancellable>()
-
+    private var arViewContainer: ARViewContainer?
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
         // Create the SwiftUI view that provides the window contents.
 
         let arDelegate = ARDelegate(store: store, networkClient: networkClient)
         arDelegate.loadScene()
-        let contentView = ContentView(sceneDelegate: arDelegate).environmentObject(store)
+        let arViewContainer = ARViewContainer(sceneDelegate: arDelegate, store: store)
+        self.arViewContainer = arViewContainer
+        let contentView = ContentView(sceneDelegate: arDelegate, arViewContainer: arViewContainer).environmentObject(store)
         // Use a UIHostingController as window root view controller.
         let window = UIWindow(frame: UIScreen.main.bounds)
         window.rootViewController = UIHostingController(rootView: contentView)

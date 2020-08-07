@@ -23,10 +23,10 @@ struct ContentView : View {
 
     @EnvironmentObject var store: Store<ViewModel>
     let sceneDelegate: ARSessionDelegate & HasOptionalARView
+    let arViewContainer: ARViewContainer
     var body: some View {
         ZStack {
-            ARViewContainer(sceneDelegate: sceneDelegate, store: store)
-                .edgesIgnoringSafeArea(.all)
+            arViewContainer.edgesIgnoringSafeArea(.all)
             WithSelectedSpaceView()
         }
         .sheet(isPresented: $store.value.isShowingModalInfoCollectionFlow, onDismiss: {
@@ -146,17 +146,15 @@ final class ARViewContainer: UIViewRepresentable {
     let sceneDelegate: ARSessionDelegate & HasOptionalARView
     var sceneObserver: Cancellable!
     var anchorStateChangeObserver: Cancellable!
+    let arView = ARView(frame: .zero)
 
     init(sceneDelegate: ARSessionDelegate & HasOptionalARView, store: Store<ViewModel>) {
         self.sceneDelegate = sceneDelegate
         self.store = store
+        self.store.value.arView = arView
     }
 
     func makeUIView(context: Context) -> ARView {
-        let arView = ARView(frame: .zero)
-
-        
-        store.value.arView = arView
         #if !targetEnvironment(simulator)
         arView.session.delegate = sceneDelegate
         sceneDelegate.tapGestureSetup()
@@ -196,15 +194,22 @@ class TestARSession: NSObject, ARSessionDelegate, HasOptionalARView {
 
     }
 
-    func updateWithEntity(entity: HasAnchoring) {
-        
-    }
-
     func tapGestureSetup() {
     }
 }
 struct ContentView_Previews : PreviewProvider {
 
+    private class DummyDelegate: NSObject, ARSessionDelegate, HasOptionalARView {
+        func tapGestureSetup() {
+
+        }
+
+        func setupObservers(arView: ARView) {
+
+        }
+
+
+    }
     static var previews: some View {
 
         var viewModelWithSelected = ViewModel()
@@ -227,13 +232,14 @@ struct ContentView_Previews : PreviewProvider {
         viewModelShowingListAndAlert.showingAlert = .createMarker("Hello there", ARView(), nil)
         let storeShowingListAndAlert = Store<ViewModel>(initialValue: viewModelShowingListAndAlert, networkClient: NetworkClient())
 
+        let arViewContainer = ARViewContainer(sceneDelegate: DummyDelegate(), store: storeShowingListAndAlert)
         return Group {
-            ContentView(sceneDelegate: TestARSession()).environmentObject(storeSelected)
-            ContentView(sceneDelegate: TestARSession()).environmentObject(storeWithoutSelected)
-            ContentView(sceneDelegate: TestARSession()).environmentObject(storeShowingAlert)
-            ContentView(sceneDelegate: TestARSession()).environmentObject(storeShowingListNoAlert)
-            ContentView(sceneDelegate: TestARSession()).environmentObject(storeShowingListAndAlert)
-            ContentView(sceneDelegate: TestARSession()).environmentObject(storeShowingListAndAlert).environment(\.colorScheme, .dark)
+            ContentView(sceneDelegate: TestARSession(), arViewContainer: arViewContainer).environmentObject(storeSelected)
+            ContentView(sceneDelegate: TestARSession(), arViewContainer: arViewContainer).environmentObject(storeWithoutSelected)
+            ContentView(sceneDelegate: TestARSession(), arViewContainer: arViewContainer).environmentObject(storeShowingAlert)
+            ContentView(sceneDelegate: TestARSession(), arViewContainer: arViewContainer).environmentObject(storeShowingListNoAlert)
+            ContentView(sceneDelegate: TestARSession(), arViewContainer: arViewContainer).environmentObject(storeShowingListAndAlert)
+            ContentView(sceneDelegate: TestARSession(), arViewContainer: arViewContainer).environmentObject(storeShowingListAndAlert).environment(\.colorScheme, .dark)
 
         }
     }
