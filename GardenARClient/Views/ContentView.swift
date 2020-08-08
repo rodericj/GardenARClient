@@ -61,10 +61,10 @@ extension ContentView {
     func addSign(named name: String, at raycastResult: ARRaycastResult?, on  arView: ARView) {
         #if !targetEnvironment(simulator)
 
-        guard let originalSignEntityScene = self.store.value.loadedPlantSignScene else {
-            print("There is no original plant sign scene")
-            return
-        }
+//        guard let originalSignEntityScene = self.store.value.loadedPlantSignScene else {
+//            print("There is no original plant sign scene")
+//            return
+//        }
         // This is us adding the full scene to the
         guard let clonedPlantSign = self.store.value.loadedPlantSignScene?.plantSignEntityToAttach?.clone(recursive: true) else {
             print("no plant sign entity")
@@ -108,119 +108,7 @@ extension ContentView {
 
     }
 }
-final class ARViewContainer: NSObject, UIViewRepresentable {
-    let store: Store<ViewModel>
-    let sceneDelegate: ARSessionDelegate
-    var sceneObserver: Cancellable!
-    var anchorStateChangeObserver: Cancellable!
-    let arView = ARView(frame: .zero)
-    private var disposables = Set<AnyCancellable>()
 
-    init(sceneDelegate: ARSessionDelegate, store: Store<ViewModel>) {
-        self.sceneDelegate = sceneDelegate
-        self.store = store
-        self.store.value.arView = arView
-    }
-
-    func makeUIView(context: Context) -> ARView {
-        #if !targetEnvironment(simulator)
-        arView.session.delegate = self
-        tapGestureSetup()
-        setupObservers(arView: arView)
-        #endif
-        arView.addCoaching()
-        return arView
-    }
-
-    static func dismantleUIView(_ uiView: ARView, coordinator: ()) {
-        print("We've been asked to dismantle our arView")
-    }
-    // MARK: - Gesture recognizer callbacks
-    func updateUIView(_ uiView: ARView, context: Context) {}
-
-    func setupObservers(arView: ARView) {
-
-        // When an anchor is added, we need to trigger the lookAtCamera notification which is set to repeat
-        arView.scene.publisher(for: SceneEvents.AnchoredStateChanged.self)
-            .subscribe(on: RunLoop.main)
-            .filter { $0.isAnchored }
-            .filter { $0.anchor.name == Scene.AnchorCollection.signAnchorNameIdentifier }
-            .map { $0.anchor }
-            .sink { plantSignAnchorWrapper in
-                print("Anchor State Changed to isAnchored true. This means we have a new anchor")
-                // TODO ok unrelated actually I think when we re-load a new arView we need to move this thing over perhaps
-
-                // Get the previously loaded scene. This contains the notifications and the original entity which we've cloned
-                guard let scene = self.store.value.loadedPlantSignScene else {
-                    print("we must not have a scene yet")
-                    return
-                }
-
-                guard let originalSignEntity = scene.plantSignEntityToAttach else {
-                    print("This is the origina entity. use this as the key for the overrides")
-                    return
-                }
-                let notifications = scene.notifications
-                let overrides = [originalSignEntity.name: plantSignAnchorWrapper]
-                notifications.lookAtCamera.post(overrides: overrides)
-        }.store(in: &disposables)
-    }
-
-    fileprivate func addNewAnchor(_ sender: UITapGestureRecognizer) {
-           // Get the user's tap screen location.
-           guard let arView = store.value.arView else {
-               return
-           }
-           let touchLocation = sender.location(in: arView)
-
-           // do nothing if we are in the adding sign state
-           guard !store.value.isAddingSign else {
-               addSign(at: touchLocation, on: arView)
-               return
-           }
-
-          checkForCollisions(at: touchLocation, on: arView)
-       }
-    
-    func tapGestureSetup() {
-           let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tappedOnARView))
-           assert(store.value.arView != nil)
-           store.value.arView?.addGestureRecognizer(tapGesture)
-       }
-
-       /// Tap gesture input handler.
-       /// - Tag: TapHandler
-       @objc
-       func tappedOnARView(_ sender: UITapGestureRecognizer) {
-           addNewAnchor(sender)
-       }
-
-       private func addSign(at touchLocation: CGPoint, on arView: ARView) {
-           // Cast a ray to check for its intersection with any planes.
-           #if !targetEnvironment(simulator)
-
-           let raycastResultsArray = arView.raycast(from: touchLocation, allowing: .estimatedPlane, alignment: .any)
-           guard let raycastResult = raycastResultsArray.first else {
-               // TODO messageLabel.displayMessage("No surface detected, try getting closer.", duration: 2.0)
-               print("No surface detected, try getting closer.")
-               return
-           }
-           store.value.showingAlert = .createMarker("Name this plant", arView, raycastResult)
-           #endif
-       }
-
-       private func checkForCollisions(at touchLocation: CGPoint, on arView: ARView) {
-           let hits = arView.hitTest(touchLocation)
-           hits.map { $0.entity.findRoot() }
-               .map { $0.findEntity(named: "PlantSignEntityToAttach") }
-               .compactMap { $0 }
-               .forEach { entity in
-                   print("we have tapped on \(entity.anchor?.anchorIdentifier)")
-                   store.value.isShowingPlantInfo = true
-                   store.value.isShowingModalInfoCollectionFlow = true
-           }
-       }
-}
 extension ARView: ARCoachingOverlayViewDelegate {
     func addCoaching() {
 
