@@ -38,10 +38,9 @@ struct AddItemsButtons: View {
 
 struct AddSpaceButton_Previews: PreviewProvider {
     static var previews: some View {
-        var viewModel = ViewModel()
         let bananaSpace = SpaceInfo(title: "Banana", id: UUID())
-        let store = Store<ViewModel>(initialValue: viewModel, networkClient: NetworkClient())
-        viewModel.selectedSpace = .space(bananaSpace)
+        let store = Store<ViewModel>(initialValue: ViewModel(), networkClient: NetworkClient())
+        spaceSelectionReducer(viewModel: &store.value, action: .selectSpace(bananaSpace))
         return AddItemsButtons().environmentObject(store)
     }
 }

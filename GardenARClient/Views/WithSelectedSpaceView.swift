@@ -46,7 +46,7 @@ struct WithSelectedSpaceView: View {
                 VStack {
                     Button(action: {
                         self.store.value.isAddingSign = false // TODO use a reducer here
-                        self.store.value.selectedSpace = .none
+                        spaceSelectionReducer(viewModel: &self.store.value, action: .clearSpace)
                     }) {
                         if self.store.value.selectedSpace != .none {
                             CTAButtonView(title: store.value.selectedSpace.title)
@@ -64,18 +64,18 @@ struct WithSelectedSpaceView_Previews: PreviewProvider {
         let bananaSpace = SpaceInfo(title: "Banana", id: UUID())
         let appleSpace = SpaceInfo(title: "Apple", id: UUID())
         var viewModelWithTwoSpaces = ViewModel()
-        viewModelWithTwoSpaces.selectedSpace = .space(appleSpace)
+        spaceSelectionReducer(viewModel: &viewModelWithTwoSpaces, action: .selectSpace(appleSpace))
         viewModelWithTwoSpaces.spaces = .fetched([appleSpace, bananaSpace])
         let storeWithTwoSpaces = Store<ViewModel>(initialValue: viewModelWithTwoSpaces, networkClient: NetworkClient())
 
         var viewModelWithOneSpaceIsAddingSign = ViewModel()
-        viewModelWithOneSpaceIsAddingSign.selectedSpace = .space(bananaSpace)
+        spaceSelectionReducer(viewModel: &viewModelWithOneSpaceIsAddingSign, action: .selectSpace(bananaSpace))
         viewModelWithOneSpaceIsAddingSign.spaces = .fetched([bananaSpace])
         viewModelWithOneSpaceIsAddingSign.isAddingSign = true
         let storeWithOneSpaceIsAdding = Store<ViewModel>(initialValue: viewModelWithOneSpaceIsAddingSign, networkClient: NetworkClient())
 
         var viewModelWithOneSpace = ViewModel()
-        viewModelWithOneSpace.selectedSpace = .space(bananaSpace)
+        spaceSelectionReducer(viewModel: &viewModelWithOneSpace, action: .selectSpace(bananaSpace))
         viewModelWithOneSpace.spaces = .fetched([bananaSpace])
         let storeWithOneSpace = Store<ViewModel>(initialValue: viewModelWithOneSpace, networkClient: NetworkClient())
 

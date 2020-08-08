@@ -159,7 +159,8 @@ struct ContentView_Previews : PreviewProvider {
         let storeShowingListNoAlert = Store<ViewModel>(initialValue: viewModelShowingListNoAlert, networkClient: NetworkClient())
 
         var viewModelShowingListAndAlert = ViewModel()
-        viewModelShowingListAndAlert.selectedSpace = .none
+        spaceSelectionReducer(viewModel: &viewModelShowingListAndAlert, action: .clearSpace)
+
         viewModelShowingListAndAlert.spaces = .fetched([SpaceInfo(title: "Banana", id: UUID())])
         viewModelShowingListAndAlert.showingAlert = .createMarker("Hello there", ARView(), nil)
         let storeShowingListAndAlert = Store<ViewModel>(initialValue: viewModelShowingListAndAlert, networkClient: NetworkClient())

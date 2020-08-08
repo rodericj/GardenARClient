@@ -130,7 +130,7 @@ extension Store where Value == ViewModel {
                 case .failed(let error):
                     print("error making a space \(error)")
                 }
-                self.value.selectedSpace = .space(newSpaceInfo)
+                spaceSelectionReducer(viewModel: &self.value, action: .selectSpace(newSpaceInfo))
                 cancellable?.cancel()
             })
     }
